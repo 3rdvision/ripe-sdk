@@ -1,5 +1,5 @@
 if (
-    typeof require !== "undefined" &&
+    typeof Deno !== "undefined" || typeof require !== "undefined" &&
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||

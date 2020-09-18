@@ -1,5 +1,5 @@
 if (
-    typeof require !== "undefined" &&
+    typeof Deno !== "undefined" || typeof require !== "undefined" &&
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
@@ -55,7 +55,7 @@ ripe.build = function() {
 };
 
 if (
-    typeof require !== "undefined" &&
+    typeof Deno !== "undefined" || typeof require !== "undefined" &&
     (typeof window === "undefined" || typeof __webpack_require__ !== "undefined") && // eslint-disable-line camelcase
     typeof XMLHttpRequest === "undefined" // eslint-disable-line no-use-before-define
 ) {
@@ -77,7 +77,7 @@ if (
 }
 
 if (
-    typeof require !== "undefined" &&
+    typeof Deno !== "undefined" || typeof require !== "undefined" &&
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
