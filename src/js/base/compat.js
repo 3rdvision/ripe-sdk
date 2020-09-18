@@ -51,13 +51,15 @@ ripe.build = function() {
 };
 
 if (
-    // eslint-disable-next-line camelcase
-    typeof __webpack_require__ === "undefined" &&
-    (typeof navigator === "undefined" || navigator.product !== "ReactNative")
+    typeof require !== "undefined" &&
+    (typeof window === "undefined" || typeof __webpack_require__ !== "undefined") && // eslint-disable-line camelcase
+    typeof XMLHttpRequest === "undefined" // eslint-disable-line no-use-before-define
 ) {
     var XMLHttpRequest = null;
     if (
-        true
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ === "undefined" &&
+        (typeof navigator === "undefined" || navigator.product !== "ReactNative")
     ) {
         // this is an hack to work around metro's (react-native bundler)
         // static analysis, needed until it supports optional imports
