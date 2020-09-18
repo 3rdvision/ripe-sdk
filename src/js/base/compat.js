@@ -51,7 +51,9 @@ ripe.build = function() {
 };
 
 if (
-    true
+    // eslint-disable-next-line camelcase
+    typeof __webpack_require__ === "undefined" &&
+    (typeof navigator === "undefined" || navigator.product !== "ReactNative")
 ) {
     var XMLHttpRequest = null;
     if (
