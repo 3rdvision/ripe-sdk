@@ -1,28 +1,20 @@
-if (
-    typeof require !== "undefined" &&
-    (typeof window === "undefined" ||
-        // eslint-disable-next-line camelcase
-        typeof __webpack_require__ !== "undefined" ||
-        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
-) {
-    // eslint-disable-next-line no-redeclare
-    var base = require("./base");
-    require("./ripe");
-    // eslint-disable-next-line no-redeclare
-    var ripe = base.ripe;
-}
+// eslint-disable-next-line no-redeclare
+var base = require("./base");
+require("./ripe");
+// eslint-disable-next-line no-redeclare
+var ripe = base.ripe;
 
 /**
  * @ignore
  */
-ripe.Ripe.prototype.isAuth = function() {
+ripe.Ripe.prototype.isAuth = function () {
     return Boolean(this.sid);
 };
 
 /**
  * @ignore
  */
-ripe.Ripe.prototype.isOAuth = function() {
+ripe.Ripe.prototype.isOAuth = function () {
     if (!window.localStorage) {
         return false;
     }
@@ -37,7 +29,7 @@ ripe.Ripe.prototype.isOAuth = function() {
 /**
  * @ignore
  */
-ripe.Ripe.prototype.isOAuthCode = function() {
+ripe.Ripe.prototype.isOAuthCode = function () {
     const query = window.location.search || "";
     const unpacked = this._unpackQuery(query);
     const code = unpacked.code;
@@ -47,7 +39,7 @@ ripe.Ripe.prototype.isOAuthCode = function() {
 /**
  * @ignore
  */
-ripe.Ripe.prototype.isOAuthError = function() {
+ripe.Ripe.prototype.isOAuthError = function () {
     const query = window.location.search || "";
     const unpacked = this._unpackQuery(query);
     const error = unpacked.error;
@@ -60,7 +52,7 @@ ripe.Ripe.prototype.isOAuthError = function() {
  *
  * @returns {Boolean} Boolean representing if an OAuth process has been fulfilled.
  */
-ripe.Ripe.prototype.isOAuthPending = function() {
+ripe.Ripe.prototype.isOAuthPending = function () {
     if (this.isAuth()) {
         return false;
     }
@@ -77,7 +69,7 @@ ripe.Ripe.prototype.isOAuthPending = function() {
  * @param {Function} callback Function with the result of the request.
  * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
  */
-ripe.Ripe.prototype.auth = function(username, password, options, callback) {
+ripe.Ripe.prototype.auth = function (username, password, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
 
@@ -99,7 +91,7 @@ ripe.Ripe.prototype.auth = function(username, password, options, callback) {
  * @param {Object} options An object of options to configure the request.
  * @returns {Promise} The authentication data.
  */
-ripe.Ripe.prototype.authP = function(username, password, options) {
+ripe.Ripe.prototype.authP = function (username, password, options) {
     return new Promise((resolve, reject) => {
         this.auth(username, password, options, (result, isValid, request) => {
             isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
@@ -120,7 +112,7 @@ ripe.Ripe.prototype.authP = function(username, password, options) {
  * @param {Function} callback Function with the result of the request.
  * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
  */
-ripe.Ripe.prototype.authAdmin = function(username, password, options, callback) {
+ripe.Ripe.prototype.authAdmin = function (username, password, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
 
@@ -147,7 +139,7 @@ ripe.Ripe.prototype.authAdmin = function(username, password, options, callback) 
  * @param {Object} options An object of options to configure the request.
  * @returns {Promise} The authentication data.
  */
-ripe.Ripe.prototype.authAdminP = function(username, password, options) {
+ripe.Ripe.prototype.authAdminP = function (username, password, options) {
     return new Promise((resolve, reject) => {
         this.authAdmin(username, password, options, (result, isValid, request) => {
             isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
@@ -163,7 +155,7 @@ ripe.Ripe.prototype.authAdminP = function(username, password, options) {
  * @param {Function} callback Function with the result of the authentication.
  * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
  */
-ripe.Ripe.prototype.authPid = function(token, options, callback) {
+ripe.Ripe.prototype.authPid = function (token, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
 
@@ -185,7 +177,7 @@ ripe.Ripe.prototype.authPid = function(token, options, callback) {
  * @param {Object} options An object of options to configure the authentication.
  * @returns {Promise} The authentication data.
  */
-ripe.Ripe.prototype.authPidP = function(token, options) {
+ripe.Ripe.prototype.authPidP = function (token, options) {
     return new Promise((resolve, reject) => {
         this.authPid(token, options, (result, isValid, request) => {
             isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
@@ -204,7 +196,7 @@ ripe.Ripe.prototype.authPidP = function(token, options) {
  * @param {Function} callback Function with the result of the request.
  * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
  */
-ripe.Ripe.prototype.authKey = function(key, options, callback) {
+ripe.Ripe.prototype.authKey = function (key, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
 
@@ -226,7 +218,7 @@ ripe.Ripe.prototype.authKey = function(key, options, callback) {
  * @param {Function} callback Function with the result of the request.
  * @returns {Promise} The authenticated account data.
  */
-ripe.Ripe.prototype.authKeyP = function(key, options) {
+ripe.Ripe.prototype.authKeyP = function (key, options) {
     return new Promise((resolve, reject) => {
         this.authKey(key, options, (result, isValid, request) => {
             isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
@@ -240,7 +232,7 @@ ripe.Ripe.prototype.authKeyP = function(key, options) {
  * @param {Object} options The set of options used for unauth process.
  * @param {Function} callback The callback to be called once session is unauth'ed.
  */
-ripe.Ripe.prototype.unauth = function(options, callback) {
+ripe.Ripe.prototype.unauth = function (options, callback) {
     this.sid = null;
     this.username = null;
     this.tokens = null;
@@ -268,7 +260,7 @@ ripe.Ripe.prototype.unauth = function(options, callback) {
  * token retrieval functions are finished.
  * @returns {oauthAccessToken} Either an invalid/unset value or the result of the login operation.
  */
-ripe.Ripe.prototype.oauth = function(options, callback) {
+ripe.Ripe.prototype.oauth = function (options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
     options = options || {};
@@ -372,7 +364,7 @@ ripe.Ripe.prototype.oauth = function(options, callback) {
 /**
  * @ignore
  */
-ripe.Ripe.prototype.oauthRedirect = function(options, callback) {
+ripe.Ripe.prototype.oauthRedirect = function (options, callback) {
     const location = window.location;
     const currentUrl =
         location.protocol + "//" + location.host + "/" + location.pathname.split("/")[1];
