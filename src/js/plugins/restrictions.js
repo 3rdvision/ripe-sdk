@@ -1,5 +1,5 @@
 if (
-    typeof Deno !== "undefined" 
+    true 
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");

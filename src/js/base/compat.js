@@ -1,5 +1,5 @@
 if (
-    typeof Deno !== "undefined" 
+    true 
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");
@@ -51,7 +51,7 @@ ripe.build = function() {
 };
 
 if (
-    typeof Deno !== "undefined"
+    true
 ) {
     var XMLHttpRequest = null;
     if (
@@ -69,7 +69,7 @@ if (
 }
 
 if (
-    typeof Deno !== "undefined"  &&
+    true  &&
     typeof fetch === "undefined" // eslint-disable-line no-use-before-define
 ) {
     var fetch = null;
