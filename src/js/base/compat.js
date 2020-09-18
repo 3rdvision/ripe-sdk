@@ -60,9 +60,7 @@ if (
         // this is an hack to work around metro's (react-native bundler)
         // static analysis, needed until it supports optional imports
         // (https://github.com/react-native-community/discussions-and-proposals/issues/120)
-        const mixedModuleName = "Xmlhttprequest";
-        const correctModuleName = mixedModuleName.toLowerCase();
-        XMLHttpRequest = require(correctModuleName).XMLHttpRequest;
+        XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
     } else {
         XMLHttpRequest = window.XMLHttpRequest;
     }

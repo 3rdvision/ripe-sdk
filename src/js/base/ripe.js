@@ -41,6 +41,91 @@ ripe.RipeBase = function(brand, model, options = {}) {
 };
 
 /**
+ * Sets Ripe instance options according to the defaulting policy.
+ *
+ * @param {Object} options An object with the options to configure the Ripe instance, such as:
+ *  - 'variant' - The variant of the model.
+ *  - 'version' - The version of the model, obtained from the containing build.
+ *  - 'dku' - The DKU (Dynamic Keeping Unit) to be used in the configuration (if any).
+ *  - 'parts' - The initial parts of the model.
+ *  - 'country' - The country where the model will be sold.
+ *  - 'currency' - The currency that should be used to calculate the price.
+ *  - 'locale' - The locale to be used by default when localizing values.
+ *  - 'flag' - A specific attribute of the model.
+ *  - 'format' - The format of the image that is going to be retrieved in case of image visual and interactive.
+ *  - 'backgroundColor' - The background color in RGB format to be used for images.
+ *  - 'guess' - If the optimistic guess mode should be used for config resolution (internal).
+ *  - 'guessUrl' - If base production URL should be guessed using GeoIP information.
+ *  - 'remoteCalls' - If the remote calls (eg: 'on_config') should be called in the middle of configuration.
+ *  - 'useBundles' - If the bundles should be loaded during initial loading.
+ *  - 'useDefaults' - If the default parts of the model should be used when no initials parts are set.
+ *  - 'useCombinations' - If the combinations should be loaded as part of the initial RIPE loading.
+ *  - 'usePrice' - If the price should be automatically retrieved whenever there is a customization change.
+ *  - 'useDiag' - If the diagnostics module should be used.
+ */
+ripe.Ripe.prototype.setOptions = function(options = {}) {
+    this.options = options;
+    this.variant = this.options.variant || null;
+    this.version = this.options.version || null;
+    this.dku = this.options.dku || null;
+    this.url = this.options.url || "https://sandbox.platforme.com/api/";
+    this.webUrl = this.options.webUrl || "https://sandbox.platforme.com/";
+    this.params = this.options.params || {};
+    this.headers = this.options.headers || {};
+    this.parts = this.options.parts || {};
+    this.country = this.options.country || null;
+    this.currency = this.options.currency || null;
+    this.locale = this.options.locale || null;
+    this.flag = this.options.flag || null;
+    this.format = this.options.format || null;
+    this.backgroundColor = this.options.backgroundColor || "";
+    this.guess = this.options.guess === undefined ? undefined : this.options.guess;
+    this.guessUrl = this.options.guessUrl === undefined ? undefined : this.options.guessUrl;
+    this.remoteCalls = this.options.remoteCalls === undefined ? true : this.options.remoteCalls;
+    this.remoteOnConfig =
+        this.options.remoteOnConfig === undefined ? this.remoteCalls : this.options.remoteOnConfig;
+    this.remoteOnPart =
+        this.options.remoteOnPart === undefined ? this.remoteCalls : this.options.remoteOnPart;
+    this.remoteOnInitials =
+        this.options.remoteOnInitials === undefined
+            ? this.remoteCalls
+            : this.options.remoteOnInitials;
+    this.noBundles = this.options.noBundles === undefined ? false : this.options.noBundles;
+    this.useBundles =
+        this.options.useBundles === undefined ? !this.noBundles : this.options.useBundles;
+    this.noDefaults = this.options.noDefaults === undefined ? false : this.options.noDefaults;
+    this.useDefaults =
+        this.options.useDefaults === undefined ? !this.noDefaults : this.options.useDefaults;
+    this.noCombinations =
+        this.options.noCombinations === undefined ? false : this.options.noCombinations;
+    this.useCombinations =
+        this.options.useCombinations === undefined
+            ? !this.noCombinations
+            : this.options.useCombinations;
+    this.noPrice = this.options.noPrice === undefined ? false : this.options.noPrice;
+    this.usePrice = this.options.usePrice === undefined ? !this.noPrice : this.options.usePrice;
+    this.noDiag = this.options.noDiag === undefined ? false : this.options.noDiag;
+    this.useDiag = this.options.useDiag === undefined ? !this.noDiag : this.options.useDiag;
+
+    // in case the requested format is the "dynamic" lossless one
+    // tries to find the best lossless image format taking into account
+    // the current browser environment
+    if (this.format === "lossless") {
+        this.format = this._supportsWebp() ? "webp" : "png";
+    }
+
+    // in case the lossful meta-format is defined defines the best possible
+    // lossful format taking into account the environment
+    if (this.format === "lossful") {
+        this.format = "jpeg";
+    }
+
+    // runs the background color normalization process that removes
+    // the typical cardinal character from the definition
+    this.backgroundColor = this.backgroundColor.replace("#", "");
+};
+
+/**
  * The initializer of the class, to be called whenever the instance
  * is going to become active.
  *
@@ -481,91 +566,6 @@ ripe.Ripe.prototype.remote = async function() {
         this.combinations = await this.getCombinationsP();
         this.trigger("combinations", this.combinations);
     }
-};
-
-/**
- * Sets Ripe instance options according to the defaulting policy.
- *
- * @param {Object} options An object with the options to configure the Ripe instance, such as:
- *  - 'variant' - The variant of the model.
- *  - 'version' - The version of the model, obtained from the containing build.
- *  - 'dku' - The DKU (Dynamic Keeping Unit) to be used in the configuration (if any).
- *  - 'parts' - The initial parts of the model.
- *  - 'country' - The country where the model will be sold.
- *  - 'currency' - The currency that should be used to calculate the price.
- *  - 'locale' - The locale to be used by default when localizing values.
- *  - 'flag' - A specific attribute of the model.
- *  - 'format' - The format of the image that is going to be retrieved in case of image visual and interactive.
- *  - 'backgroundColor' - The background color in RGB format to be used for images.
- *  - 'guess' - If the optimistic guess mode should be used for config resolution (internal).
- *  - 'guessUrl' - If base production URL should be guessed using GeoIP information.
- *  - 'remoteCalls' - If the remote calls (eg: 'on_config') should be called in the middle of configuration.
- *  - 'useBundles' - If the bundles should be loaded during initial loading.
- *  - 'useDefaults' - If the default parts of the model should be used when no initials parts are set.
- *  - 'useCombinations' - If the combinations should be loaded as part of the initial RIPE loading.
- *  - 'usePrice' - If the price should be automatically retrieved whenever there is a customization change.
- *  - 'useDiag' - If the diagnostics module should be used.
- */
-ripe.Ripe.prototype.setOptions = function(options = {}) {
-    this.options = options;
-    this.variant = this.options.variant || null;
-    this.version = this.options.version || null;
-    this.dku = this.options.dku || null;
-    this.url = this.options.url || "https://sandbox.platforme.com/api/";
-    this.webUrl = this.options.webUrl || "https://sandbox.platforme.com/";
-    this.params = this.options.params || {};
-    this.headers = this.options.headers || {};
-    this.parts = this.options.parts || {};
-    this.country = this.options.country || null;
-    this.currency = this.options.currency || null;
-    this.locale = this.options.locale || null;
-    this.flag = this.options.flag || null;
-    this.format = this.options.format || null;
-    this.backgroundColor = this.options.backgroundColor || "";
-    this.guess = this.options.guess === undefined ? undefined : this.options.guess;
-    this.guessUrl = this.options.guessUrl === undefined ? undefined : this.options.guessUrl;
-    this.remoteCalls = this.options.remoteCalls === undefined ? true : this.options.remoteCalls;
-    this.remoteOnConfig =
-        this.options.remoteOnConfig === undefined ? this.remoteCalls : this.options.remoteOnConfig;
-    this.remoteOnPart =
-        this.options.remoteOnPart === undefined ? this.remoteCalls : this.options.remoteOnPart;
-    this.remoteOnInitials =
-        this.options.remoteOnInitials === undefined
-            ? this.remoteCalls
-            : this.options.remoteOnInitials;
-    this.noBundles = this.options.noBundles === undefined ? false : this.options.noBundles;
-    this.useBundles =
-        this.options.useBundles === undefined ? !this.noBundles : this.options.useBundles;
-    this.noDefaults = this.options.noDefaults === undefined ? false : this.options.noDefaults;
-    this.useDefaults =
-        this.options.useDefaults === undefined ? !this.noDefaults : this.options.useDefaults;
-    this.noCombinations =
-        this.options.noCombinations === undefined ? false : this.options.noCombinations;
-    this.useCombinations =
-        this.options.useCombinations === undefined
-            ? !this.noCombinations
-            : this.options.useCombinations;
-    this.noPrice = this.options.noPrice === undefined ? false : this.options.noPrice;
-    this.usePrice = this.options.usePrice === undefined ? !this.noPrice : this.options.usePrice;
-    this.noDiag = this.options.noDiag === undefined ? false : this.options.noDiag;
-    this.useDiag = this.options.useDiag === undefined ? !this.noDiag : this.options.useDiag;
-
-    // in case the requested format is the "dynamic" lossless one
-    // tries to find the best lossless image format taking into account
-    // the current browser environment
-    if (this.format === "lossless") {
-        this.format = this._supportsWebp() ? "webp" : "png";
-    }
-
-    // in case the lossful meta-format is defined defines the best possible
-    // lossful format taking into account the environment
-    if (this.format === "lossful") {
-        this.format = "jpeg";
-    }
-
-    // runs the background color normalization process that removes
-    // the typical cardinal character from the definition
-    this.backgroundColor = this.backgroundColor.replace("#", "");
 };
 
 /**
