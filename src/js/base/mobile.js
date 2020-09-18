@@ -1,12 +1,20 @@
-// eslint-disable-next-line no-redeclare
-var base = require("./base");
-// eslint-disable-next-line no-redeclare
-var ripe = base.ripe;
+if (
+    typeof require !== "undefined" &&
+    (typeof window === "undefined" ||
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ !== "undefined" ||
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
+) {
+    // eslint-disable-next-line no-redeclare
+    var base = require("./base");
+    // eslint-disable-next-line no-redeclare
+    var ripe = base.ripe;
+}
 
 /**
  * @ignore
  */
-ripe.touchHandler = function (element, options = {}) {
+ripe.touchHandler = function(element, options = {}) {
     // eslint-disable-next-line no-undef
     if (typeof Mobile !== "undefined" && Mobile.touchHandler) {
         return;
@@ -15,7 +23,7 @@ ripe.touchHandler = function (element, options = {}) {
     const SAFE = options.safe === undefined ? true : options.safe;
     const VALID = options.valid || ["DIV", "IMG", "SPAN", "CANVAS"];
 
-    const eventHandler = function (event) {
+    const eventHandler = function(event) {
         // retrieves the complete set of touches and uses
         // only the first one for type reference
         const touches = event.changedTouches;

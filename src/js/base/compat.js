@@ -1,7 +1,15 @@
-// eslint-disable-next-line no-redeclare
-var base = require("./base");
-// eslint-disable-next-line no-redeclare
-var ripe = base.ripe;
+if (
+    typeof require !== "undefined" &&
+    (typeof window === "undefined" ||
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ !== "undefined" ||
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
+) {
+    // eslint-disable-next-line no-redeclare
+    var base = require("./base");
+    // eslint-disable-next-line no-redeclare
+    var ripe = base.ripe;
+}
 
 /**
  * Assigns a certain set of values in the provided object to the
@@ -12,7 +20,7 @@ var ripe = base.ripe;
  *
  * @ignore
  */
-ripe.assign = function (target) {
+ripe.assign = function(target) {
     if (typeof Object.assign === "function") {
         return Object.assign.apply(this, arguments);
     }
@@ -40,7 +48,7 @@ ripe.assign = function (target) {
 /**
  * @ignore
  */
-ripe.build = function () {
+ripe.build = function() {
     const _arguments = Array.prototype.slice.call(arguments);
     _arguments.unshift({});
     return ripe.assign.apply(this, _arguments);

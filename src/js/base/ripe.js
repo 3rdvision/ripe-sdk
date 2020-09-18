@@ -1,8 +1,16 @@
-// eslint-disable-next-line no-redeclare
-var base = require("./base");
-require("./observable");
-// eslint-disable-next-line no-redeclare
-var ripe = base.ripe;
+if (
+    typeof require !== "undefined" &&
+    (typeof window === "undefined" ||
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ !== "undefined" ||
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
+) {
+    // eslint-disable-next-line no-redeclare
+    var base = require("./base");
+    require("./observable");
+    // eslint-disable-next-line no-redeclare
+    var ripe = base.ripe;
+}
 
 /**
  * Object that contains global (static) information to be used by
@@ -21,7 +29,7 @@ ripe.ripeGlobals = {
  * @param {String} model The name of the model.
  * @param {Object} options An object with the options to configure the Ripe instance.
  */
-ripe.Ripe = function (brand, model, options = {}) {
+ripe.Ripe = function(brand, model, options = {}) {
     ripe.Observable.call(this);
     ripe.Ripe.prototype.init.call(this, brand, model, options);
 };
@@ -32,7 +40,7 @@ ripe.Ripe.prototype.constructor = ripe.Ripe;
 /**
  * @ignore
  */
-ripe.RipeBase = function (brand, model, options = {}) {
+ripe.RipeBase = function(brand, model, options = {}) {
     return new ripe.Ripe(brand, model, options);
 };
 
@@ -43,7 +51,7 @@ ripe.RipeBase = function (brand, model, options = {}) {
  * Sets the various values for the Ripe instance taking into account
  * the provided configuration and defaulting values policy.
  */
-ripe.Ripe.prototype.init = async function (brand = null, model = null, options = {}) {
+ripe.Ripe.prototype.init = async function(brand = null, model = null, options = {}) {
     // generates a new global identifier and adds the current
     // instance to the list og globally managed ones
     ripe.ripeGlobals.id++;
@@ -115,7 +123,7 @@ ripe.Ripe.prototype.init = async function (brand = null, model = null, options =
     // registers for the config (finished) event so that the execution may
     // be able to notify the server side logic and change the current state
     // if that's required by the server side
-    this.bind("config", async function () {
+    this.bind("config", async function() {
         let result = null;
         if (!this.remoteOnConfig) return;
         const ctxRequest = (this.ctxRequest = (this.ctxRequest || 0) + 1);
@@ -135,7 +143,7 @@ ripe.Ripe.prototype.init = async function (brand = null, model = null, options =
     // registers for the part (set) operation so that the execution may
     // be able to notify the server side logic and change the current state
     // if that's required by the server side
-    this.bind("part", async function (name, value) {
+    this.bind("part", async function(name, value) {
         let result = null;
         if (!this.remoteOnPart) return;
         const ctxRequest = (this.ctxRequest = (this.ctxRequest || 0) + 1);
@@ -155,7 +163,7 @@ ripe.Ripe.prototype.init = async function (brand = null, model = null, options =
     // registers for the initials (set) operation so that the execution may
     // be able to notify the server side logic and change the current state
     // if that's required by the server side
-    this.bind("initials", async function (initials, engraving, params) {
+    this.bind("initials", async function(initials, engraving, params) {
         let result = null;
         if (!this.remoteOnInitials) return;
         if (params.noRemote) return;
@@ -177,7 +185,7 @@ ripe.Ripe.prototype.init = async function (brand = null, model = null, options =
     // registers for the initials_extra (set) operation so that the execution may
     // be able to notify the server side logic and change the current state
     // if that's required by the server side
-    this.bind("initials_extra", async function (initialsExtra, params) {
+    this.bind("initials_extra", async function(initialsExtra, params) {
         let result = null;
         if (!this.remoteOnInitials) return;
         if (params.noRemote) return;
@@ -200,7 +208,7 @@ ripe.Ripe.prototype.init = async function (brand = null, model = null, options =
 
     // listens for the post parts event and saves the current configuration
     // for the undo operations (history control)
-    this.bind("post_parts", function (parts, options) {
+    this.bind("post_parts", function(parts, options) {
         // in case the current operation was an undo and redo one there's
         // nothing to be done (no history stack change)
         if (options && ["undo", "redo"].indexOf(options.action) !== -1) {
@@ -236,7 +244,7 @@ ripe.Ripe.prototype.init = async function (brand = null, model = null, options =
  * The deinitializer to be called when it should stop responding
  * to updates so that any necessary cleanup operations can be executed.
  */
-ripe.Ripe.prototype.deinit = async function () {
+ripe.Ripe.prototype.deinit = async function() {
     let index = null;
 
     for (index = this.children.length - 1; index >= 0; index--) {
@@ -260,7 +268,7 @@ ripe.Ripe.prototype.deinit = async function () {
  *
  * @returns {Object} The current RIPE instance (for pipelining).
  */
-ripe.Ripe.prototype.load = function () {
+ripe.Ripe.prototype.load = function() {
     this.update(undefined, { reason: "load" });
     return this;
 };
@@ -272,7 +280,7 @@ ripe.Ripe.prototype.load = function () {
  *
  * @returns {Object} The current RIPE instance (for pipelining).
  */
-ripe.Ripe.prototype.unload = function () {
+ripe.Ripe.prototype.unload = function() {
     return this;
 };
 
@@ -300,7 +308,7 @@ ripe.Ripe.prototype.unload = function () {
  *  - 'safe' - If the call should 'await' for all the composing operations before returning or if instead
  * should allow operations to be performed in a parallel and detached manner.
  */
-ripe.Ripe.prototype.config = async function (brand, model, options = {}) {
+ripe.Ripe.prototype.config = async function(brand, model, options = {}) {
     // unsets the configured flag so that all the sensitive
     // configuration related operation are disabled while
     // the config operation is being performed, this is
@@ -461,7 +469,7 @@ ripe.Ripe.prototype.config = async function (brand, model, options = {}) {
 /**
  * @ignore
  */
-ripe.Ripe.prototype.remote = async function () {
+ripe.Ripe.prototype.remote = async function() {
     // makes sure that both the brand and the model values are defined
     // for the current instance as they are needed for the remove operation
     // that are going to be performed
@@ -502,7 +510,7 @@ ripe.Ripe.prototype.remote = async function () {
  *  - 'usePrice' - If the price should be automatically retrieved whenever there is a customization change.
  *  - 'useDiag' - If the diagnostics module should be used.
  */
-ripe.Ripe.prototype.setOptions = function (options = {}) {
+ripe.Ripe.prototype.setOptions = function(options = {}) {
     this.options = options;
     this.variant = this.options.variant || null;
     this.version = this.options.version || null;
@@ -580,7 +588,7 @@ ripe.Ripe.prototype.setOptions = function (options = {}) {
  * @param {Boolean} events If the parts events should be triggered (defaults to 'true').
  * @param {Object} options The options to be used in the set part operations (for internal use)..
  */
-ripe.Ripe.prototype.setPart = async function (part, material, color, events = true, options = {}) {
+ripe.Ripe.prototype.setPart = async function(part, material, color, events = true, options = {}) {
     const runUpdate = options.runUpdate === undefined ? true : options.runUpdate;
     const waitUpdate = options.waitUpdate === undefined ? true : options.waitUpdate;
 
@@ -613,7 +621,7 @@ ripe.Ripe.prototype.setPart = async function (part, material, color, events = tr
  * @param {Boolean} events If the parts events should be triggered (defaults to 'true').
  * @param {Object} options An object with options to configure the operation (for internal use).
  */
-ripe.Ripe.prototype.setParts = async function (update, events = true, options = {}) {
+ripe.Ripe.prototype.setParts = async function(update, events = true, options = {}) {
     const partEvents = options.partEvents === undefined ? true : options.partEvents;
     const runUpdate = options.runUpdate === undefined ? true : options.runUpdate;
     const waitUpdate = options.waitUpdate === undefined ? true : options.waitUpdate;
@@ -657,7 +665,7 @@ ripe.Ripe.prototype.setParts = async function (update, events = true, options = 
  * @param {Object} params Extra parameters that control the behaviour of
  * the set initials operation.
  */
-ripe.Ripe.prototype.setInitials = async function (initials, engraving, events = true, params = {}) {
+ripe.Ripe.prototype.setInitials = async function(initials, engraving, events = true, params = {}) {
     if (typeof initials === "object") {
         events = engraving === undefined ? true : engraving;
         const result = await this.setInitialsExtra(initials, events);
@@ -731,7 +739,7 @@ ripe.Ripe.prototype.setInitials = async function (initials, engraving, events = 
  * @param {Object} params Extra parameters that control the behaviour of
  * the set initials operation.
  */
-ripe.Ripe.prototype.setInitialsExtra = async function (initialsExtra, events = true, params = {}) {
+ripe.Ripe.prototype.setInitialsExtra = async function(initialsExtra, events = true, params = {}) {
     const groups = Object.keys(initialsExtra);
     const isEmpty = groups.length === 0;
     const mainGroup = groups.includes("main") ? "main" : groups[0];
@@ -800,7 +808,7 @@ ripe.Ripe.prototype.setInitialsExtra = async function (initialsExtra, events = t
  *
  * @returns {Object} The base context currently set.
  */
-ripe.Ripe.prototype.getCtx = function (ctx) {
+ripe.Ripe.prototype.getCtx = function(ctx) {
     return this.ctx;
 };
 
@@ -811,7 +819,7 @@ ripe.Ripe.prototype.getCtx = function (ctx) {
  *
  * @param {Object} ctx The new base context to be used.
  */
-ripe.Ripe.prototype.setCtx = function (ctx) {
+ripe.Ripe.prototype.setCtx = function(ctx) {
     this.ctx = ctx;
 };
 
@@ -822,7 +830,7 @@ ripe.Ripe.prototype.setCtx = function (ctx) {
  *
  * @returns {Object} The model's configuration.
  */
-ripe.Ripe.prototype.getLoadedConfig = function () {
+ripe.Ripe.prototype.getLoadedConfig = function() {
     return this.loadedConfig;
 };
 
@@ -833,7 +841,7 @@ ripe.Ripe.prototype.getLoadedConfig = function () {
  * @returns {Object} The object that contains the state for every single
  * part, material, and color.
  */
-ripe.Ripe.prototype.getChoices = function () {
+ripe.Ripe.prototype.getChoices = function() {
     return this.choices;
 };
 
@@ -846,7 +854,7 @@ ripe.Ripe.prototype.getChoices = function () {
  * @param {Boolean} events If the choices events should be triggered (defaults
  * to 'true').
  */
-ripe.Ripe.prototype.setChoices = function (choices, events = true) {
+ripe.Ripe.prototype.setChoices = function(choices, events = true) {
     // updates the internal object with the choices that are now
     // going to be set
     this.choices = choices;
@@ -870,7 +878,7 @@ ripe.Ripe.prototype.setChoices = function (choices, events = true) {
  *
  * @returns {Object} The model's available frames.
  */
-ripe.Ripe.prototype.getFrames = async function (callback) {
+ripe.Ripe.prototype.getFrames = async function(callback) {
     if (this.options.frames) {
         if (callback) callback(this.options.frames);
         return this.options.frames;
@@ -919,7 +927,7 @@ ripe.Ripe.prototype.getFrames = async function (callback) {
  * that further config updates will have this new format set.
  * @param {Boolean} update If an update operation should be perform asynchronous.
  */
-ripe.Ripe.prototype.setFormat = async function (format, override = true, update = true) {
+ripe.Ripe.prototype.setFormat = async function(format, override = true, update = true) {
     if (format === this.options.format) return;
     this.format = format;
     this.getChildren("Configurator").forEach(c => {
@@ -943,7 +951,7 @@ ripe.Ripe.prototype.setFormat = async function (format, override = true, update 
  * that further config updates will have this new format set.
  * @param {Boolean} update If an update operation should be perform asynchronous.
  */
-ripe.Ripe.prototype.setSize = async function (size, override = true, update = true) {
+ripe.Ripe.prototype.setSize = async function(size, override = true, update = true) {
     if (size === this.options.size) return;
     this.size = size;
     this.getChildren("Configurator").forEach(c => {
@@ -967,7 +975,7 @@ ripe.Ripe.prototype.setSize = async function (size, override = true, update = tr
  * that further config updates will have this new format set.
  * @param {Boolean} update If an update operation should be perform asynchronous.
  */
-ripe.Ripe.prototype.setBackgroundColor = async function (
+ripe.Ripe.prototype.setBackgroundColor = async function(
     backgroundColor,
     override = true,
     update = true
@@ -991,7 +999,7 @@ ripe.Ripe.prototype.setBackgroundColor = async function (
  * @param {String} type The type of child as a string to filter children.
  * @return {Array} The child elements that fill the provided type.
  */
-ripe.Ripe.prototype.getChildren = function (type = null) {
+ripe.Ripe.prototype.getChildren = function(type = null) {
     if (type === null) return this.children;
     return this.children.filter(child => type === null || child.type === type);
 };
@@ -1003,7 +1011,7 @@ ripe.Ripe.prototype.getChildren = function (type = null) {
  * @param {Object} options An Object with options to configure the Image instance.
  * @returns {Image} The Image instance created.
  */
-ripe.Ripe.prototype.bindImage = function (element, options = {}) {
+ripe.Ripe.prototype.bindImage = function(element, options = {}) {
     const image = new ripe.Image(this, element, options);
     return this.bindInteractable(image);
 };
@@ -1015,7 +1023,7 @@ ripe.Ripe.prototype.bindImage = function (element, options = {}) {
  * @param {Object} options An Object with options to configure the Configurator instance.
  * @returns {Configurator} The Configurator instance created.
  */
-ripe.Ripe.prototype.bindConfigurator = function (element, options = {}) {
+ripe.Ripe.prototype.bindConfigurator = function(element, options = {}) {
     options = Object.assign({}, { format: this.format }, options);
     const config = new ripe.Configurator(this, element, options);
     return this.bindInteractable(config);
@@ -1028,7 +1036,7 @@ ripe.Ripe.prototype.bindConfigurator = function (element, options = {}) {
  * @param {Object} options An Object with options to configure the Interactable instance.
  * @returns {Interactable} The Interactable instance created.
  */
-ripe.Ripe.prototype.bindInteractable = function (element) {
+ripe.Ripe.prototype.bindInteractable = function(element) {
     this.children.push(element);
     this.trigger("bound", element);
     return element;
@@ -1040,7 +1048,7 @@ ripe.Ripe.prototype.bindInteractable = function (element) {
  * @param {Interactable} element The Interactable instance to be unbound.
  * @returns {Interactable} Returns the unbounded Interactable.
  */
-ripe.Ripe.prototype.unbindInteractable = async function (element) {
+ripe.Ripe.prototype.unbindInteractable = async function(element) {
     await element.deinit();
     this.children.splice(this.children.indexOf(element), 1);
     this.trigger("unbound", element);
@@ -1069,7 +1077,7 @@ ripe.Ripe.prototype.unbindConfigurator = ripe.Ripe.prototype.unbindInteractable;
  * @param {String} part The name of the part to be selected.
  * @param {Object} options An Object with options to configure the operation.
  */
-ripe.Ripe.prototype.selectPart = function (part, options = {}) {
+ripe.Ripe.prototype.selectPart = function(part, options = {}) {
     this.trigger("selected_part", part);
 };
 
@@ -1080,7 +1088,7 @@ ripe.Ripe.prototype.selectPart = function (part, options = {}) {
  * @param {String} part The name of the part to be deselected.
  * @param {Object} options An Object with options to configure the operation.
  */
-ripe.Ripe.prototype.deselectPart = function (part, options = {}) {
+ripe.Ripe.prototype.deselectPart = function(part, options = {}) {
     this.trigger("deselected_part", part);
 };
 
@@ -1104,7 +1112,7 @@ ripe.Ripe.prototype.deselectPart = function (part, options = {}) {
  * operation has been performed the result is true otherwise in case this is
  * a no-op from the "visual" point of view the result is false.
  */
-ripe.Ripe.prototype.update = async function (state = null, options = {}, children = null) {
+ripe.Ripe.prototype.update = async function(state = null, options = {}, children = null) {
     // in case the force flag is not set and the ready or the configured
     // values are not set (instance not ready for updates)
     if (!options.force && (this.ready === false || this.configured === false)) {
@@ -1203,7 +1211,7 @@ ripe.Ripe.prototype.update = async function (state = null, options = {}, childre
     }
 };
 
-ripe.Ripe.prototype.cancel = async function (options = {}, children = null) {
+ripe.Ripe.prototype.cancel = async function(options = {}, children = null) {
     // defaults the children variable to the current set of registered
     // children, as expected by specification
     children = children || this.children;
@@ -1255,7 +1263,7 @@ ripe.Ripe.prototype.cancel = async function (options = {}, children = null) {
  * Reverses the last change to the parts. It is possible
  * to undo all the changes done from the initial state.
  */
-ripe.Ripe.prototype.undo = async function () {
+ripe.Ripe.prototype.undo = async function() {
     if (!this.canUndo()) {
         return;
     }
@@ -1269,7 +1277,7 @@ ripe.Ripe.prototype.undo = async function () {
  * Executes the same operation as `undo` but goes all the way
  * to the bottom of the stack that controls the history.
  */
-ripe.Ripe.prototype.undoAll = async function () {
+ripe.Ripe.prototype.undoAll = async function() {
     if (!this.canUndo()) {
         return;
     }
@@ -1285,7 +1293,7 @@ ripe.Ripe.prototype.undoAll = async function () {
  * is in the middle of the stack the complete stack forward
  * is removed (history re-written).
  */
-ripe.Ripe.prototype.redo = async function () {
+ripe.Ripe.prototype.redo = async function() {
     if (!this.canRedo()) {
         return;
     }
@@ -1299,7 +1307,7 @@ ripe.Ripe.prototype.redo = async function () {
  * Executes the same operation as `redo` but goes all the way
  * to the top of the stack that controls the history.
  */
-ripe.Ripe.prototype.redoAll = async function () {
+ripe.Ripe.prototype.redoAll = async function() {
     if (!this.canRedo()) {
         return;
     }
@@ -1315,7 +1323,7 @@ ripe.Ripe.prototype.redoAll = async function () {
  * @returns {Boolean} If there are changes to reverse in the
  * current parts history stack.
  */
-ripe.Ripe.prototype.canUndo = function () {
+ripe.Ripe.prototype.canUndo = function() {
     return this.historyPointer > 0;
 };
 
@@ -1325,7 +1333,7 @@ ripe.Ripe.prototype.canUndo = function () {
  * @returns {Boolean} If there are changes to reapply pending
  * in the history stack.
  */
-ripe.Ripe.prototype.canRedo = function () {
+ripe.Ripe.prototype.canRedo = function() {
     return this.history.length - 1 > this.historyPointer;
 };
 
@@ -1339,7 +1347,7 @@ ripe.Ripe.prototype.canRedo = function () {
  * @returns {Promise} The promise to be fulfilled once the instance
  * is ready to be used.
  */
-ripe.Ripe.prototype.isReady = async function () {
+ripe.Ripe.prototype.isReady = async function() {
     await new Promise((resolve, reject) => {
         if (this.ready) {
             resolve();
@@ -1362,7 +1370,7 @@ ripe.Ripe.prototype.isReady = async function () {
  * @returns {Promise} The promise to be fulfilled on the base locale
  * bundles are loaded.
  */
-ripe.Ripe.prototype.hasBundles = async function () {
+ripe.Ripe.prototype.hasBundles = async function() {
     await new Promise((resolve, reject) => {
         if (this.bundles) resolve();
         else this.bind("bundles", resolve);
@@ -1374,7 +1382,7 @@ ripe.Ripe.prototype.hasBundles = async function () {
  *
  * @param {Plugin} plugin The plugin to be registered.
  */
-ripe.Ripe.prototype.addPlugin = function (plugin) {
+ripe.Ripe.prototype.addPlugin = function(plugin) {
     plugin.register(this);
     this.plugins.push(plugin);
 };
@@ -1384,7 +1392,7 @@ ripe.Ripe.prototype.addPlugin = function (plugin) {
  *
  * @param {Plugin} plugin The plugin to be unregistered.
  */
-ripe.Ripe.prototype.removePlugin = function (plugin) {
+ripe.Ripe.prototype.removePlugin = function(plugin) {
     plugin.unregister(this);
     this.plugins.splice(this.plugins.indexOf(plugin), 1);
 };
@@ -1398,7 +1406,7 @@ ripe.Ripe.prototype.removePlugin = function (plugin) {
  * @returns {Object} A copy of the provided parts with the optional parts
  * set even if not defined.
  */
-ripe.Ripe.prototype.normalizeParts = function (parts) {
+ripe.Ripe.prototype.normalizeParts = function(parts) {
     if (!parts) return parts;
 
     const defaults = this.loadedConfig.defaults;
@@ -1419,7 +1427,7 @@ ripe.Ripe.prototype.normalizeParts = function (parts) {
 /**
  * @ignore
  */
-ripe.Ripe.prototype._guessUrl = async function () {
+ripe.Ripe.prototype._guessUrl = async function() {
     const result = await this.geoResolveP();
     const country = result.country ? result.country.iso_code : null;
     switch (country) {
@@ -1441,7 +1449,7 @@ ripe.Ripe.prototype._guessUrl = async function () {
 /**
  * @ignore
  */
-ripe.Ripe.prototype._initBundles = async function (defaultLocale = "en_us") {
+ripe.Ripe.prototype._initBundles = async function(defaultLocale = "en_us") {
     const locale = this.locale || defaultLocale;
     const globalBundleP = this.localeBundleP(locale, "scales");
     const sizesBundleP = this.localeBundleP(locale, "sizes");
@@ -1455,23 +1463,23 @@ ripe.Ripe.prototype._initBundles = async function (defaultLocale = "en_us") {
 /**
  * @ignore
  */
-ripe.Ripe.prototype._getState = function (safe = true) {
+ripe.Ripe.prototype._getState = function(safe = true) {
     return safe
         ? JSON.parse(JSON.stringify(this._getState(false)))
         : {
-            brand: this.brand,
-            model: this.model,
-            parts: this.parts,
-            initials: this.initials,
-            engraving: this.engraving,
-            initialsExtra: this.initialsExtra
-        };
+              brand: this.brand,
+              model: this.model,
+              parts: this.parts,
+              initials: this.initials,
+              engraving: this.engraving,
+              initialsExtra: this.initialsExtra
+          };
 };
 
 /**
  * @ignore
  */
-ripe.Ripe.prototype._setPart = async function (
+ripe.Ripe.prototype._setPart = async function(
     part,
     material,
     color,
@@ -1558,7 +1566,7 @@ ripe.Ripe.prototype._setPart = async function (
 /**
  * @ignore
  */
-ripe.Ripe.prototype._setParts = async function (update, events = true) {
+ripe.Ripe.prototype._setParts = async function(update, events = true) {
     for (let index = 0; index < update.length; index++) {
         const part = update[index];
         await this._setPart(part[0], part[1], part[2], events);
@@ -1568,7 +1576,7 @@ ripe.Ripe.prototype._setParts = async function (update, events = true) {
 /**
  * @ignore
  */
-ripe.Ripe.prototype._partsList = function (parts) {
+ripe.Ripe.prototype._partsList = function(parts) {
     parts = parts || this.parts;
     const partsList = [];
     for (const part in parts) {
@@ -1581,7 +1589,7 @@ ripe.Ripe.prototype._partsList = function (parts) {
 /**
  * @ignore
  */
-ripe.Ripe.prototype._pushHistory = function () {
+ripe.Ripe.prototype._pushHistory = function() {
     if (!this.parts || !Object.keys(this.parts).length) {
         return;
     }
@@ -1603,7 +1611,7 @@ ripe.Ripe.prototype._pushHistory = function () {
  * @param {Error} error The error that is going to be
  * handled.
  */
-ripe.Ripe.prototype._errorHandler = function (error) {
+ripe.Ripe.prototype._errorHandler = function(error) {
     // sets the error in the current instance and then triggers the
     // error event on the current instance (notification)
     this.ready = this.ready || false;
@@ -1619,7 +1627,7 @@ ripe.Ripe.prototype._errorHandler = function (error) {
  * @param {Object} result The resulting ctx object that is going to
  * be used in the changing of the internal state.
  */
-ripe.Ripe.prototype._handleCtx = function (result) {
+ripe.Ripe.prototype._handleCtx = function(result) {
     if (result === undefined || result === null) return;
     if (result.parts === undefined || result.parts === null) return;
     result.parts = result.parts === undefined ? {} : result.parts;
@@ -1648,7 +1656,7 @@ ripe.Ripe.prototype._handleCtx = function (result) {
  * @returns {Object} The state object that can be used to control
  * the state of parts, materials and colors;
  */
-ripe.Ripe.prototype._toChoices = function (loadedConfig) {
+ripe.Ripe.prototype._toChoices = function(loadedConfig) {
     const choices = {};
     for (const part of loadedConfig.parts) {
         if (loadedConfig.defaults[part.name].hidden) continue;
@@ -1674,7 +1682,7 @@ ripe.Ripe.prototype._toChoices = function (loadedConfig) {
     return choices;
 };
 
-ripe.Ripe.prototype._supportsWebp = function () {
+ripe.Ripe.prototype._supportsWebp = function() {
     const element = document.createElement("canvas");
     if (!(element.getContext && element.getContext("2d"))) return false;
     return element.toDataURL("image/webp").indexOf("data:image/webp") === 0;

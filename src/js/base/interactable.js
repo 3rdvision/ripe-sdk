@@ -1,7 +1,15 @@
-// eslint-disable-next-line no-redeclare
-var base = require("./base");
-// eslint-disable-next-line no-redeclare
-var ripe = base.ripe;
+if (
+    typeof require !== "undefined" &&
+    (typeof window === "undefined" ||
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ !== "undefined" ||
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
+) {
+    // eslint-disable-next-line no-redeclare
+    var base = require("./base");
+    // eslint-disable-next-line no-redeclare
+    var ripe = base.ripe;
+}
 
 /**
  * @class
@@ -14,7 +22,7 @@ var ripe = base.ripe;
  * @param {Object} options The options to be used to configure the
  * interactable instance to be created.
  */
-ripe.Interactable = function (owner, options = {}) {
+ripe.Interactable = function(owner, options = {}) {
     ripe.Observable.call(this);
 
     this.owner = owner;
@@ -31,7 +39,7 @@ ripe.Interactable.prototype.constructor = ripe.Interactable;
  * The initializer of the class, to be called (by the owner)
  * whenever this interactable is going to become active.
  */
-ripe.Interactable.prototype.init = function () {
+ripe.Interactable.prototype.init = function() {
     ripe.Observable.prototype.init.call(this);
 };
 
@@ -40,7 +48,7 @@ ripe.Interactable.prototype.init = function () {
  * it should stop responding to updates so that any necessary
  * cleanup operations can be executed.
  */
-ripe.Interactable.prototype.deinit = async function () {
+ripe.Interactable.prototype.deinit = async function() {
     this.owner = null;
 
     ripe.Observable.prototype.deinit.call(this);
@@ -56,7 +64,7 @@ ripe.Interactable.prototype.deinit = async function () {
  * @param {Object} options Map with the partial set of values to update
  * the currently set options
  */
-ripe.Interactable.prototype.updateOptions = async function (options) {
+ripe.Interactable.prototype.updateOptions = async function(options) {
     this.options = Object.assign(this.options, options);
 };
 
@@ -68,4 +76,4 @@ ripe.Interactable.prototype.updateOptions = async function (options) {
  * @param {Object} options Set of update options that change the way
  * the update operation is going to be performed.
  */
-ripe.Interactable.prototype.update = async function (state, options = {}) { };
+ripe.Interactable.prototype.update = async function(state, options = {}) {};
