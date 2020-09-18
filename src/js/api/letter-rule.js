@@ -12,16 +12,17 @@ if (
 }
 
 /**
- * Retrieves the complete set of account data to the current session.
+ * Gets the existing letter rules, according to the provided filtering
+ * strategy as normalized values.
  *
- * @param {Object} options An object of options to configure the request.
+ * @param {Object} options An object of options to configure the request
  * @param {Function} callback Function with the result of the request.
  * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
  */
-ripe.Ripe.prototype.accountMe = function(options, callback) {
+ripe.Ripe.prototype.getLetterRules = function(options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = `${this.url}accounts/me`;
+    const url = `${this.url}letter_rules`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -32,15 +33,15 @@ ripe.Ripe.prototype.accountMe = function(options, callback) {
 };
 
 /**
- * Retrieves the complete set of account data to the current session.
+ * Gets the existing letter rules, according to the provided filtering
+ * strategy as normalized values.
  *
  * @param {Object} options An object of options to configure the request.
- * @param {Function} callback Function with the result of the request.
- * @returns {Promise} Resulting information for the callback execution.
+ * @returns {Promise} The letter rules result list.
  */
-ripe.Ripe.prototype.accountMeP = function(options) {
+ripe.Ripe.prototype.getLetterRulesP = function(options) {
     return new Promise((resolve, reject) => {
-        this.accountMe(options, (result, isValid, request) => {
+        this.getLetterRules(options, (result, isValid, request) => {
             isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });

@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -22,7 +22,7 @@ if (
 ripe.Ripe.prototype.getPriceRules = function(options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "price_rules";
+    const url = `${this.url}price_rules`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -37,12 +37,12 @@ ripe.Ripe.prototype.getPriceRules = function(options, callback) {
  * strategy as normalized values.
  *
  * @param {Object} options An object of options to configure the request.
- * @returns {Promise} The orders result list.
+ * @returns {Promise} The price rules list.
  */
 ripe.Ripe.prototype.getPriceRulesP = function(options) {
     return new Promise((resolve, reject) => {
         this.getPriceRules(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -59,7 +59,7 @@ ripe.Ripe.prototype.getPriceRulesP = function(options) {
 ripe.Ripe.prototype.getPriceRule = function(id, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "price_rules/" + id;
+    const url = `${this.url}price_rules/${id}`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -80,7 +80,7 @@ ripe.Ripe.prototype.getPriceRule = function(id, options, callback) {
 ripe.Ripe.prototype.getPriceRuleP = function(id, options) {
     return new Promise((resolve, reject) => {
         this.getPriceRule(id, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -96,8 +96,7 @@ ripe.Ripe.prototype.getPriceRuleP = function(id, options) {
 ripe.Ripe.prototype.createPriceRule = function(priceRule, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "price_rules";
-
+    const url = `${this.url}price_rules`;
     options = Object.assign(options, {
         url: url,
         method: "POST",
@@ -118,7 +117,7 @@ ripe.Ripe.prototype.createPriceRule = function(priceRule, options, callback) {
 ripe.Ripe.prototype.createPriceRuleP = function(priceRule, options) {
     return new Promise((resolve, reject) => {
         this.createPriceRule(priceRule, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -134,7 +133,7 @@ ripe.Ripe.prototype.createPriceRuleP = function(priceRule, options) {
 ripe.Ripe.prototype.updatePriceRule = function(priceRule, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "price_rules/" + priceRule.id;
+    const url = `${this.url}price_rules/${priceRule.id}`;
     options = Object.assign(options, {
         url: url,
         method: "PUT",
@@ -155,7 +154,7 @@ ripe.Ripe.prototype.updatePriceRule = function(priceRule, options, callback) {
 ripe.Ripe.prototype.updatePriceRuleP = function(priceRule, options) {
     return new Promise((resolve, reject) => {
         this.updatePriceRule(priceRule, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -172,7 +171,7 @@ ripe.Ripe.prototype.updatePriceRuleP = function(priceRule, options) {
 ripe.Ripe.prototype.deletePriceRule = function(id, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "price_rules/" + id;
+    const url = `${this.url}price_rules/${id}`;
     options = Object.assign(options, {
         url: url,
         method: "DELETE",
@@ -193,7 +192,7 @@ ripe.Ripe.prototype.deletePriceRule = function(id, options, callback) {
 ripe.Ripe.prototype.deletePriceRuleP = function(id, options) {
     return new Promise((resolve, reject) => {
         this.deletePriceRule(id, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };

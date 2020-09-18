@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");
@@ -83,6 +83,8 @@ ripe.Ripe.prototype.auth = function(username, password, options, callback) {
 
     this.signin(username, password, options, (result, isValid, request) => {
         this.sid = result.sid;
+        this.username = result.username;
+        this.tokens = result.tokens;
         this.trigger("auth");
         if (callback) callback(result, isValid, request);
     });
@@ -100,7 +102,7 @@ ripe.Ripe.prototype.auth = function(username, password, options, callback) {
 ripe.Ripe.prototype.authP = function(username, password, options) {
     return new Promise((resolve, reject) => {
         this.auth(username, password, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -125,6 +127,8 @@ ripe.Ripe.prototype.authAdmin = function(username, password, options, callback) 
     this.signinAdmin(username, password, options, (result, isValid, request) => {
         if (isValid) {
             this.sid = result.sid;
+            this.username = result.username;
+            this.tokens = result.tokens;
             this.trigger("auth");
         }
         if (callback) callback(result, isValid, request);
@@ -146,7 +150,7 @@ ripe.Ripe.prototype.authAdmin = function(username, password, options, callback) 
 ripe.Ripe.prototype.authAdminP = function(username, password, options) {
     return new Promise((resolve, reject) => {
         this.authAdmin(username, password, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -166,6 +170,8 @@ ripe.Ripe.prototype.authPid = function(token, options, callback) {
     this.signinPid(token, options, (result, isValid, request) => {
         if (isValid) {
             this.sid = result.sid;
+            this.username = result.username;
+            this.tokens = result.tokens;
             this.trigger("auth");
         }
         if (callback) callback(result, isValid, request);
@@ -182,7 +188,7 @@ ripe.Ripe.prototype.authPid = function(token, options, callback) {
 ripe.Ripe.prototype.authPidP = function(token, options) {
     return new Promise((resolve, reject) => {
         this.authPid(token, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -202,15 +208,9 @@ ripe.Ripe.prototype.authKey = function(key, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
 
-    const headers = {
-        "X-Secret-Key": key
-    };
-    options.headers = headers;
+    this.key = key;
     this.accountMe(options, (result, isValid, request) => {
-        if (isValid) {
-            this.key = key;
-            this.trigger("auth");
-        }
+        if (isValid) this.trigger("auth");
         if (callback) callback(result, isValid, request);
     });
 };
@@ -229,7 +229,7 @@ ripe.Ripe.prototype.authKey = function(key, options, callback) {
 ripe.Ripe.prototype.authKeyP = function(key, options) {
     return new Promise((resolve, reject) => {
         this.authKey(key, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -242,6 +242,8 @@ ripe.Ripe.prototype.authKeyP = function(key, options) {
  */
 ripe.Ripe.prototype.unauth = function(options, callback) {
     this.sid = null;
+    this.username = null;
+    this.tokens = null;
 
     if (window.localStorage) {
         localStorage.removeItem("oauth_token");
@@ -312,6 +314,8 @@ ripe.Ripe.prototype.oauth = function(options, callback) {
         return this.oauthLogin(oauthToken, options, (result, isValid, request) => {
             if (isValid && result) {
                 this.sid = result.sid;
+                this.username = result.username;
+                this.tokens = result.tokens;
                 this.trigger("auth");
                 if (callback) callback(result, isValid, request);
             } else {

@@ -3,16 +3,13 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
     require("./visual");
     // eslint-disable-next-line no-redeclare
     var ripe = base.ripe;
-    var MutationObserver = typeof MutationObserver === "undefined" ? null : MutationObserver;
-    var WebKitMutationObserver =
-        typeof WebKitMutationObserver === "undefined" ? null : WebKitMutationObserver;
 }
 
 /**
@@ -39,6 +36,7 @@ ripe.Image = function(owner, element, options) {
 };
 
 ripe.Image.prototype = ripe.build(ripe.Visual.prototype);
+ripe.Image.prototype.constructor = ripe.Image;
 
 /**
  * The Image initializer, which is called (by the owner)
@@ -50,12 +48,13 @@ ripe.Image.prototype = ripe.build(ripe.Visual.prototype);
 ripe.Image.prototype.init = function() {
     ripe.Visual.prototype.init.call(this);
 
-    this.frame = this.options.frame || 0;
+    this.frame = this.options.frame || null;
     this.format = this.options.format || null;
-    this.size = this.options.size || 1000;
+    this.size = this.options.size || null;
     this.width = this.options.width || null;
     this.height = this.options.height || null;
-    this.crop = this.options.crop || false;
+    this.crop = this.options.crop || null;
+    this.mutations = this.options.mutations || false;
     this.showInitials = this.options.showInitials || false;
     this.initialsGroup = this.options.initialsGroup || null;
     this.initialsBuilder =
@@ -74,6 +73,47 @@ ripe.Image.prototype.init = function() {
 };
 
 /**
+ * The Image deinitializer, to be called (by the owner) when
+ * it should stop responding to updates so that any necessary
+ * cleanup operations can be executed.
+ */
+ripe.Image.prototype.deinit = async function() {
+    await this.cancel();
+
+    this._unregisterHandlers();
+
+    this._observer = null;
+    this.initialsBuilder = null;
+
+    ripe.Visual.prototype.deinit.call(this);
+};
+
+/**
+ * Updates the Image's current options with the ones provided.
+ *
+ * @param {Object} options Set of optional parameters to adjust the Image, such as:
+ * - 'format' - The format of the image, (eg: png, jpg, svg, etc.).
+ * - 'crop' - A Boolean indicating if it is to crop the image composition.
+ * - 'initialsGroup' - The group in which the image initials belongs to.
+ * @param {Boolean} update If an update operation should be executed after
+ * the options updated operation has been performed.
+ */
+ripe.Image.prototype.updateOptions = async function(options, update = true) {
+    ripe.Visual.prototype.updateOptions.call(this, options);
+
+    this.frame = options.frame === undefined ? this.frame : options.frame;
+    this.format = options.format === undefined ? this.format : options.format;
+    this.size = options.size === undefined ? this.size : options.size;
+    this.width = options.width === undefined ? this.width : options.width;
+    this.height = options.height === undefined ? this.height : options.height;
+    this.crop = options.crop === undefined ? this.crop : options.crop;
+    this.initialsGroup =
+        options.initialsGroup === undefined ? this.initialsGroup : options.initialsGroup;
+
+    if (update) await this.update();
+};
+
+/**
  * This function is called (by the owner) whenever its state changes
  * so that the Image can update itself for the new state.
  *
@@ -81,6 +121,8 @@ ripe.Image.prototype.init = function() {
  * @param {Object} options Set of optional parameters to adjust the Image.
  */
 ripe.Image.prototype.update = async function(state, options = {}) {
+    // gathers the complete set of data values from the element if existent
+    // defaulting to the instance one in case their are not defined
     const frame = this.element.dataset.frame || this.frame;
     const format = this.element.dataset.format || this.format;
     const size = this.element.dataset.size || this.size;
@@ -113,7 +155,7 @@ ripe.Image.prototype.update = async function(state, options = {}) {
     // builds the URL of the image using the frame hacking approach
     // this should provide us with the new values
     const url = this.owner._getImageURL({
-        frame: ripe.frameNameHack(frame),
+        frame: frame,
         format: format,
         size: size,
         width: width,
@@ -191,16 +233,14 @@ ripe.Image.prototype.cancel = async function(options = {}) {
 };
 
 /**
- * The Image deinitializer, to be called (by the owner) when
- * it should stop responding to updates so that any necessary
- * cleanup operations can be executed.
+ * Resizes the Image's DOM element to 'size' pixels, both the
+ * width and the height of the image will reflect this value.
+ *
+ * @param {String} size The number of pixels to resize to.
  */
-ripe.Image.prototype.deinit = function() {
-    this._unregisterHandlers();
-    this._observer = null;
-    this.initialsBuilder = null;
-
-    ripe.Visual.prototype.deinit.call(this);
+ripe.Image.prototype.resize = function(size) {
+    this.size = size;
+    this.update();
 };
 
 /**
@@ -212,6 +252,17 @@ ripe.Image.prototype.deinit = function() {
  */
 ripe.Image.prototype.setFrame = function(frame, options) {
     this.frame = frame;
+    this.update();
+};
+
+/**
+ * Updates the Image's 'showInitials' flag that indicates
+ * if the initials should be display in the image.
+ *
+ * @param {String} showInitials If the image should display initials.
+ */
+ripe.Image.prototype.setShowInitials = function(showInitials) {
+    this.showInitials = showInitials;
     this.update();
 };
 
@@ -249,18 +300,27 @@ ripe.Image.prototype._registerHandlers = function() {
         if (this._errorCallback) this._errorCallback();
     });
 
-    // eslint-disable-next-line no-undef
-    const Observer = MutationObserver || WebKitMutationObserver;
-    this._observer = Observer
-        ? new Observer(mutations => {
-              this.update();
-          })
-        : null;
-    this._observer &&
-        this._observer.observe(this.element, {
-            attributes: true,
-            subtree: false
-        });
+    // verifies if mutation should be "observed" for this visual
+    // and in such case registers for the observation of any DOM
+    // mutation (eg: attributes) for the image element, triggering
+    // a new update operation in case that happens
+    if (this.mutations) {
+        const Observer =
+            (typeof MutationObserver !== "undefined" && MutationObserver) ||
+            (typeof WebKitMutationObserver !== "undefined" && WebKitMutationObserver) || // eslint-disable-line no-undef
+            null;
+        this._observer = Observer
+            ? new Observer(mutations => {
+                  this.update();
+              })
+            : null;
+        if (this._observer) {
+            this._observer.observe(this.element, {
+                attributes: true,
+                subtree: false
+            });
+        }
+    }
 };
 
 /**

@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");
@@ -33,6 +33,7 @@ ripe.Interactable = function(owner, options = {}) {
 };
 
 ripe.Interactable.prototype = ripe.build(ripe.Observable.prototype);
+ripe.Interactable.prototype.constructor = ripe.Interactable;
 
 /**
  * The initializer of the class, to be called (by the owner)
@@ -40,6 +41,31 @@ ripe.Interactable.prototype = ripe.build(ripe.Observable.prototype);
  */
 ripe.Interactable.prototype.init = function() {
     ripe.Observable.prototype.init.call(this);
+};
+
+/**
+ * The deinitializer to be called (by the owner) when
+ * it should stop responding to updates so that any necessary
+ * cleanup operations can be executed.
+ */
+ripe.Interactable.prototype.deinit = async function() {
+    this.owner = null;
+
+    ripe.Observable.prototype.deinit.call(this);
+};
+
+/**
+ * Updates the current set of options (object) with the partial
+ * options object provided as argument.
+ *
+ * The merge operation between both objects may override the current
+ * set of configurations.
+ *
+ * @param {Object} options Map with the partial set of values to update
+ * the currently set options
+ */
+ripe.Interactable.prototype.updateOptions = async function(options) {
+    this.options = Object.assign(this.options, options);
 };
 
 /**
@@ -51,14 +77,3 @@ ripe.Interactable.prototype.init = function() {
  * the update operation is going to be performed.
  */
 ripe.Interactable.prototype.update = async function(state, options = {}) {};
-
-/**
- * The deinitializer to be called (by the owner) when
- * it should stop responding to updates so that any necessary
- * cleanup operations can be executed.
- */
-ripe.Interactable.prototype.deinit = function() {
-    this.owner = null;
-
-    ripe.Observable.prototype.deinit.call(this);
-};

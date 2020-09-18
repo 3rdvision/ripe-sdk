@@ -185,18 +185,19 @@ describe("Restrictions", function() {
         });
     });
 
-    describe("#auto", function() {
+    describe("#auto()", function() {
         it("should load restrictions from ripe instance", async () => {
             const restrictionsPlugin = new plugins.ripe.Ripe.plugins.RestrictionsPlugin();
             const instance = new ripe.Ripe("swear", "vyner", {
                 plugins: [restrictionsPlugin],
                 noBundles: true
             }).load();
-            await instance.isReady();
 
             await new Promise((resolve, reject) => {
                 instance.bind("post_config", resolve);
             });
+
+            await instance.isReady();
 
             assert.deepStrictEqual(
                 restrictionsPlugin.restrictions,
@@ -217,7 +218,7 @@ describe("Restrictions", function() {
         });
     });
 
-    describe("#_applyChanges", function() {
+    describe("#_applyChanges()", function() {
         it("should apply simple changes", () => {
             let result;
             let target;

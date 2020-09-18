@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -31,8 +31,7 @@ if (
 ripe.Ripe.prototype.createSku = function(identifier, domain, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "skus";
-
+    const url = `${this.url}skus`;
     options = Object.assign(options, {
         url: url,
         method: "POST",
@@ -66,7 +65,7 @@ ripe.Ripe.prototype.createSku = function(identifier, domain, options, callback) 
 ripe.Ripe.prototype.createSkuP = function(identifier, domain, options) {
     return new Promise((resolve, reject) => {
         this.createSku(identifier, domain, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };

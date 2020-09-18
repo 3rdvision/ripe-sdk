@@ -3,13 +3,45 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
     // eslint-disable-next-line no-redeclare
     var ripe = base.ripe;
 }
+
+/**
+ * Gets the global configuration object from the RIPE server (admin endpoint).
+ *
+ * @param {Object} options An object of options to configure the request.
+ * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
+ */
+ripe.Ripe.prototype.configGlobal = function(options, callback) {
+    callback = typeof options === "function" ? options : callback;
+    options = typeof options === "function" || options === undefined ? {} : options;
+    const url = `${this.url}config`;
+    options = Object.assign(options, {
+        url: url,
+        method: "GET",
+        auth: true
+    });
+    options = this._build(options);
+    return this._cacheURL(options.url, options, callback);
+};
+
+/**
+ * Gets the global configuration object from the RIPE server (admin endpoint).
+ *
+ * @param {Object} options An object of options to configure the request.
+ */
+ripe.Ripe.prototype.configGlobalP = function(options) {
+    return new Promise((resolve, reject) => {
+        this.configGlobal(options, (result, isValid, request) => {
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
+        });
+    });
+};
 
 /**
  * Resolves the RIPE configuration options (includes DKU) from the provided set
@@ -40,7 +72,7 @@ ripe.Ripe.prototype.configInfo = function(options, callback) {
 ripe.Ripe.prototype.configInfoP = function(options) {
     return new Promise((resolve, reject) => {
         this.configInfo(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -77,7 +109,7 @@ ripe.Ripe.prototype.configDku = function(dku, options, callback) {
 ripe.Ripe.prototype.configDkuP = function(dku, options) {
     return new Promise((resolve, reject) => {
         this.configDku(dku, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -97,7 +129,12 @@ ripe.Ripe.prototype.configSku = function(sku, domain, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
     options = Object.assign(
-        { sku: sku, domain: domain, queryOptions: false, initialsOptions: false },
+        {
+            sku: sku,
+            domain: domain,
+            queryOptions: false,
+            initialsOptions: false
+        },
         options
     );
     options = this._getConfigInfoOptions(options);
@@ -119,7 +156,7 @@ ripe.Ripe.prototype.configSku = function(sku, domain, options, callback) {
 ripe.Ripe.prototype.configSkuP = function(sku, domain, options) {
     return new Promise((resolve, reject) => {
         this.configSku(sku, domain, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -167,7 +204,7 @@ ripe.Ripe.prototype.configResolveSku = function(domain, options, callback) {
 ripe.Ripe.prototype.configResolveSkuP = function(domain, options) {
     return new Promise((resolve, reject) => {
         this.configResolveSku(domain, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -184,7 +221,7 @@ ripe.Ripe.prototype.configResolveSkuP = function(domain, options) {
 ripe.Ripe.prototype.configResolve = function(productId, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "config/resolve/" + productId;
+    const url = `${this.url}config/resolve/${productId}`;
     options = Object.assign({ url: url }, options);
     options = this._build(options);
     return this._cacheURL(options.url, options, callback);
@@ -201,7 +238,7 @@ ripe.Ripe.prototype.configResolve = function(productId, options, callback) {
 ripe.Ripe.prototype.configResolveP = function(productId, options) {
     return new Promise((resolve, reject) => {
         this.configResolve(productId, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -236,7 +273,7 @@ ripe.Ripe.prototype._getConfigInfoOptions = function(options = {}) {
         params.guess = guess ? "1" : "0";
     }
 
-    const url = this.url + "config/info";
+    const url = `${this.url}config/info`;
 
     return Object.assign(options, {
         url: url,
@@ -261,7 +298,7 @@ ripe.Ripe.prototype._getConfigSkuOptions = function(domain, options = {}) {
 
     options.params = params;
 
-    const url = this.url + "config/sku";
+    const url = `${this.url}config/sku`;
 
     return Object.assign(options, {
         url: url,

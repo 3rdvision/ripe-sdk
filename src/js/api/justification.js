@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -30,7 +30,7 @@ if (
 ripe.Ripe.prototype.getJustifications = function(options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "justifications";
+    const url = `${this.url}justifications`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -45,12 +45,12 @@ ripe.Ripe.prototype.getJustifications = function(options, callback) {
  * strategy as normalized values.
  *
  * @param {Object} options An object of options to configure the request.
- * @returns {Promise} The orders result list.
+ * @returns {Promise} The justifications result list.
  */
 ripe.Ripe.prototype.getJustificationsP = function(options) {
     return new Promise((resolve, reject) => {
         this.getJustifications(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -73,7 +73,7 @@ ripe.Ripe.prototype.getJustificationsP = function(options) {
 ripe.Ripe.prototype.getJustificationsByContext = function(context, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "justifications/" + context;
+    const url = `${this.url}justifications/${context}`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -100,7 +100,7 @@ ripe.Ripe.prototype.getJustificationsByContext = function(context, options, call
 ripe.Ripe.prototype.getJustificationsByContextP = function(context, options) {
     return new Promise((resolve, reject) => {
         this.getJustificationsByContext(context, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };

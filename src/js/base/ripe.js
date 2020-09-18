@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");
@@ -35,6 +35,7 @@ ripe.Ripe = function(brand, model, options = {}) {
 };
 
 ripe.Ripe.prototype = ripe.build(ripe.Observable.prototype);
+ripe.Ripe.prototype.constructor = ripe.Ripe;
 
 /**
  * @ignore
@@ -82,6 +83,7 @@ ripe.Ripe.prototype.init = async function(brand = null, model = null, options = 
     this.loadedConfig = null;
     this.choices = null;
     this.ready = false;
+    this.configured = false;
     this.bundles = false;
     this.partCounter = 0;
     this.updateCounter = 0;
@@ -247,7 +249,7 @@ ripe.Ripe.prototype.deinit = async function() {
 
     for (index = this.children.length - 1; index >= 0; index--) {
         const child = this.children[index];
-        this.unbindInteractable(child);
+        await this.unbindInteractable(child);
     }
 
     for (index = this.plugins.length - 1; index >= 0; index--) {
@@ -267,7 +269,7 @@ ripe.Ripe.prototype.deinit = async function() {
  * @returns {Object} The current RIPE instance (for pipelining).
  */
 ripe.Ripe.prototype.load = function() {
-    this.update();
+    this.update(undefined, { reason: "load" });
     return this;
 };
 
@@ -303,8 +305,23 @@ ripe.Ripe.prototype.unload = function() {
  *  - 'useCombinations' - If the combinations should be loaded as part of the initial RIPE loading.
  *  - 'usePrice' - If the price should be automatically retrieved whenever there is a customization change.
  *  - 'useDiag' - If the diagnostics module should be used.
+ *  - 'safe' - If the call should 'await' for all the composing operations before returning or if instead
+ * should allow operations to be performed in a parallel and detached manner.
  */
 ripe.Ripe.prototype.config = async function(brand, model, options = {}) {
+    // unsets the configured flag so that all the sensitive
+    // configuration related operation are disabled while
+    // the config operation is being performed, this is
+    // required because there's a lot of parallelism in the
+    // execution workflow of the config and by setting this
+    // flag some data race conditions are avoided
+    this.configured = false;
+
+    // cancels any pending operation on the child elements
+    // so that no more operations are performed, any new
+    // operation could ony be considered a wat of resources
+    await this.cancel();
+
     // sets the most structural values of this entity
     // that represent the configuration to be used
     this.brand = brand;
@@ -318,7 +335,17 @@ ripe.Ripe.prototype.config = async function(brand, model, options = {}) {
     // sets the new options using the current options
     // as default values and sets the update flag to
     // true if it is not set
-    options = ripe.assign({}, this.options, options);
+    options = ripe.assign(
+        {},
+        this.options,
+        {
+            variant: null,
+            version: null,
+            dku: null,
+            parts: {}
+        },
+        options
+    );
     this.setOptions(options);
 
     // in case there's a DKU defined for the current config then
@@ -374,18 +401,6 @@ ripe.Ripe.prototype.config = async function(brand, model, options = {}) {
     // choices for the configuration context
     this.setChoices(this._toChoices(this.loadedConfig));
 
-    // triggers the config event notifying any listener that the (base)
-    // configuration for this main RIPE instance has changed and waits
-    // for the listeners to conclude their operations
-    await this.trigger("config", this.loadedConfig, options);
-
-    // determines if the ready flag is already set for the current instance
-    // and if that's not the case updates it and triggers the ready event
-    if (this.ready === false) {
-        this.ready = true;
-        this.trigger("ready");
-    }
-
     // determines if the defaults for the selected model should
     // be loaded so that the parts structure is initially populated
     const hasParts = this.parts && Object.keys(this.parts).length !== 0;
@@ -406,26 +421,49 @@ ripe.Ripe.prototype.config = async function(brand, model, options = {}) {
     // in case both the initials and the engraving value are set in the options
     // runs the updating of the internal state to update the initials
     if (options.initials && options.engraving) {
-        this.setInitials(options.initials, options.engraving, false);
+        const setInitialsPromise = this.setInitials(options.initials, options.engraving, false);
+        if (options.safe) await setInitialsPromise;
     }
 
     // in case the initials extra are defined then runs the setting of the initials
     // extra on the current instance (without update events)
     if (options.initialsExtra) {
-        this.setInitialsExtra(options.initialsExtra, false);
+        const setInitialsExtraPromise = this.setInitialsExtra(options.initialsExtra, false);
+        if (options.safe) await setInitialsExtraPromise;
+    }
+
+    // triggers the config event notifying any listener that the (base)
+    // configuration for this main RIPE instance has changed and waits
+    // for the listeners to conclude their operations
+    await this.trigger("config", this.loadedConfig, options);
+
+    // determines if the ready flag is already set for the current instance
+    // and if that's not the case updates it and triggers the ready event
+    if (this.ready === false) {
+        this.ready = true;
+        this.trigger("ready");
     }
 
     // notifies that the config has changed and waits for listeners before
     // concluding the config operation
     await this.trigger("post_config", this.loadedConfig, options);
 
+    // sets the configured flag as valid, meaning that any configuration
+    // related operation is considered safe from now on
+    this.configured = true;
+
     // triggers the remote operations, that should be executed
     // only after the complete set of post confirm promises are met
-    this.remote();
+    const remotePromise = this.remote();
+    if (options.safe) await remotePromise;
 
     // runs the initial update operation, so that all the visuals and children
     // objects are properly updated according to the new configuration
-    this.update();
+    const updatePromise = this.update(undefined, {
+        noAwaitLayout: true,
+        reason: "config"
+    });
+    if (options.safe) await updatePromise;
 };
 
 /**
@@ -453,6 +491,9 @@ ripe.Ripe.prototype.remote = async function() {
  * Sets Ripe instance options according to the defaulting policy.
  *
  * @param {Object} options An object with the options to configure the Ripe instance, such as:
+ *  - 'variant' - The variant of the model.
+ *  - 'version' - The version of the model, obtained from the containing build.
+ *  - 'dku' - The DKU (Dynamic Keeping Unit) to be used in the configuration (if any).
  *  - 'parts' - The initial parts of the model.
  *  - 'country' - The country where the model will be sold.
  *  - 'currency' - The currency that should be used to calculate the price.
@@ -476,6 +517,8 @@ ripe.Ripe.prototype.setOptions = function(options = {}) {
     this.dku = this.options.dku || null;
     this.url = this.options.url || "https://sandbox.platforme.com/api/";
     this.webUrl = this.options.webUrl || "https://sandbox.platforme.com/";
+    this.params = this.options.params || {};
+    this.headers = this.options.headers || {};
     this.parts = this.options.parts || {};
     this.country = this.options.country || null;
     this.currency = this.options.currency || null;
@@ -564,7 +607,7 @@ ripe.Ripe.prototype.setPart = async function(part, material, color, events = tru
 
     // propagates the state change in the internal structures to the
     // children elements of this RIPE instance
-    const promise = this.update();
+    const promise = this.update(undefined, { reason: "set part" });
 
     // in case the wait update options is valid (by default) then waits
     // until the update promise is fulfilled
@@ -603,7 +646,7 @@ ripe.Ripe.prototype.setParts = async function(update, events = true, options = {
 
     // propagates the state change in the internal structures to the
     // children elements of this RIPE instance
-    const promise = this.update();
+    const promise = this.update(undefined, { reason: "set parts" });
 
     // in case the wait update options is valid (by default) then waits
     // until the update promise is fulfilled
@@ -619,6 +662,8 @@ ripe.Ripe.prototype.setParts = async function(update, events = true, options = {
  * @param {String} engraving The type of engraving to be set.
  * @param {Boolean} events If the events associated with the initials
  * change should be triggered.
+ * @param {Object} params Extra parameters that control the behaviour of
+ * the set initials operation.
  */
 ripe.Ripe.prototype.setInitials = async function(initials, engraving, events = true, params = {}) {
     if (typeof initials === "object") {
@@ -671,7 +716,9 @@ ripe.Ripe.prototype.setInitials = async function(initials, engraving, events = t
     // that this execution is only performed in case this is
     // still the most up-to-date initials operation, avoiding
     // possible out-of-order execution of update operations
-    if (id === this.initialsCounter) this.update(state);
+    if (id === this.initialsCounter) {
+        this.update(state, { reason: "set initials" });
+    }
 
     // triggers the event indicating the the end of the
     // the (set) initials operation (notifies listeners)
@@ -689,6 +736,8 @@ ripe.Ripe.prototype.setInitials = async function(initials, engraving, events = t
  * initials and engraving for all the initial groups.
  * @param {Boolean} events If the events associated with the changing of
  * the initials (extra) should be triggered.
+ * @param {Object} params Extra parameters that control the behaviour of
+ * the set initials operation.
  */
 ripe.Ripe.prototype.setInitialsExtra = async function(initialsExtra, events = true, params = {}) {
     const groups = Object.keys(initialsExtra);
@@ -741,7 +790,9 @@ ripe.Ripe.prototype.setInitialsExtra = async function(initialsExtra, events = tr
     // that this execution is only performed in case this is
     // still the most up-to-date initials operation, avoiding
     // possible out-of-order execution of update operations
-    if (id === this.initialsCounter) this.update(state);
+    if (id === this.initialsCounter) {
+        this.update(state, { reason: "set initials extra" });
+    }
 
     // triggers the event indicating the the end of the
     // the (set) initials extra operation (notifies listeners)
@@ -825,7 +876,7 @@ ripe.Ripe.prototype.setChoices = function(choices, events = true) {
  * This function makes use of the loaded config in case there's
  * one, otherwise triggers the loading of the config.
  *
- * @returns {Promise} The model's available frames.
+ * @returns {Object} The model's available frames.
  */
 ripe.Ripe.prototype.getFrames = async function(callback) {
     if (this.options.frames) {
@@ -845,7 +896,10 @@ ripe.Ripe.prototype.getFrames = async function(callback) {
     // ensures that the "legacy" side face has the a value
     // populated with the "legacy" frames field in case there's
     // none populated by the standard processing loop (above)
-    frames.side = config.frames;
+    // this only happens in case the side face is defined
+    if (config.faces.indexOf("side") !== -1) {
+        frames.side = config.frames;
+    }
 
     // iterates over the complete set of faces to populate the frames
     // structure with the most up-to-date strategy using the faces map
@@ -858,6 +912,96 @@ ripe.Ripe.prototype.getFrames = async function(callback) {
     // the frames map to the caller method
     if (callback) callback(frames);
     return frames;
+};
+
+/**
+ * Updates the format setting for the current ripe instance, propagating
+ * the change to any interested child.
+ *
+ * Optionally an update operation may be performed so that the format
+ * changes are reflected in the user interface.
+ *
+ * @param {String} format The image format to be used in the ripe instance
+ * (eg: png, webp, jpeg).
+ * @param {Boolean} override If the options value should be override meaning
+ * that further config updates will have this new format set.
+ * @param {Boolean} update If an update operation should be perform asynchronous.
+ */
+ripe.Ripe.prototype.setFormat = async function(format, override = true, update = true) {
+    if (format === this.options.format) return;
+    this.format = format;
+    this.getChildren("Configurator").forEach(c => {
+        c.format = format;
+    });
+    if (override) this.options.format = format;
+    if (update) this.update(undefined, { reason: "set format" });
+    this.trigger("settings");
+    return this;
+};
+
+/**
+ * Updates the size setting for the current ripe instance, propagating
+ * the change to any interested child.
+ *
+ * Optionally an update operation may be performed so that the size
+ * changes are reflected in the user interface.
+ *
+ * @param {String} size The size (in pixels) of the image to be used.
+ * @param {Boolean} override If the options value should be override meaning
+ * that further config updates will have this new format set.
+ * @param {Boolean} update If an update operation should be perform asynchronous.
+ */
+ripe.Ripe.prototype.setSize = async function(size, override = true, update = true) {
+    if (size === this.options.size) return;
+    this.size = size;
+    this.getChildren("Configurator").forEach(c => {
+        c.size = size;
+    });
+    if (override) this.options.size = size;
+    if (update) this.update(undefined, { reason: "set size" });
+    this.trigger("settings");
+    return this;
+};
+
+/**
+ * Updates the background color setting for the current ripe instance,
+ * propagating the change to any interested child.
+ *
+ * Optionally an update operation may be performed so that the background
+ * background color changes are reflected in the user interface.
+ *
+ * @param {String} backgroundColor The background color in hexadecimal to be set.
+ * @param {Boolean} override If the options value should be override meaning
+ * that further config updates will have this new format set.
+ * @param {Boolean} update If an update operation should be perform asynchronous.
+ */
+ripe.Ripe.prototype.setBackgroundColor = async function(
+    backgroundColor,
+    override = true,
+    update = true
+) {
+    if (backgroundColor) backgroundColor = backgroundColor.replace("#", "");
+    if (backgroundColor === this.options.backgroundColor) return;
+    this.backgroundColor = backgroundColor;
+    this.getChildren("Configurator").forEach(c => {
+        c.backgroundColor = backgroundColor;
+    });
+    if (override) this.options.backgroundColor = backgroundColor;
+    if (update) this.update(undefined, { reason: "set background color" });
+    this.trigger("settings");
+    return this;
+};
+
+/**
+ * Retrieves the complete set of child elements of this Ripe instance
+ * that fulfill the provided type criteria.
+ *
+ * @param {String} type The type of child as a string to filter children.
+ * @return {Array} The child elements that fill the provided type.
+ */
+ripe.Ripe.prototype.getChildren = function(type = null) {
+    if (type === null) return this.children;
+    return this.children.filter(child => type === null || child.type === type);
 };
 
 /**
@@ -904,8 +1048,8 @@ ripe.Ripe.prototype.bindInteractable = function(element) {
  * @param {Interactable} element The Interactable instance to be unbound.
  * @returns {Interactable} Returns the unbounded Interactable.
  */
-ripe.Ripe.prototype.unbindInteractable = function(element) {
-    element.deinit();
+ripe.Ripe.prototype.unbindInteractable = async function(element) {
+    await element.deinit();
     this.children.splice(this.children.indexOf(element), 1);
     this.trigger("unbound", element);
 };
@@ -957,14 +1101,24 @@ ripe.Ripe.prototype.deselectPart = function(part, options = {}) {
  * the visuals are updated in accordance.
  *
  * @param {Object} state An Object with the current customization and
- * personalization.
+ * personalization, if not provided the current internal state of the
+ * instance will be used instead.
  * @param {Object} options Set of update options that change the way
  * the update operation is going to be performed.
  * @param {Array} children The set of children that are going to be affected
  * by the updated operation, if not provided all of the currently registered
  * children in the instance will be used.
+ * @return The result of the update operation, meaning that if any child
+ * operation has been performed the result is true otherwise in case this is
+ * a no-op from the "visual" point of view the result is false.
  */
-ripe.Ripe.prototype.update = async function(state, options = {}, children = null) {
+ripe.Ripe.prototype.update = async function(state = null, options = {}, children = null) {
+    // in case the force flag is not set and the ready or the configured
+    // values are not set (instance not ready for updates)
+    if (!options.force && (this.ready === false || this.configured === false)) {
+        return false;
+    }
+
     // tries to retrieve the state of the configuration for which an update
     // operation is going to be requested
     state = state || this._getState();
@@ -981,7 +1135,8 @@ ripe.Ripe.prototype.update = async function(state, options = {}, children = null
     const _update = async () => {
         await this.trigger("pre_update", {
             id: id,
-            state: state
+            state: state,
+            options: options
         });
 
         const promises = [];
@@ -994,16 +1149,17 @@ ripe.Ripe.prototype.update = async function(state, options = {}, children = null
         if (this.ready) {
             await this.trigger("update", {
                 id: id,
-                state: state
+                state: state,
+                options: options
             });
         }
 
         // in case the use price flag is set then we should "automagically"
         // retrieve the price for the currently changed configuration
-        if (this.ready && this.usePrice) {
+        if (this.ready && this.configured && this.usePrice) {
             const timestamp = Date.now();
             this._priceTimestamp = timestamp;
-            this.getPriceP()
+            this.getPriceP(state)
                 .then(value => {
                     if (this._priceTimestamp > timestamp) return;
                     this.trigger("price", value);
@@ -1023,6 +1179,7 @@ ripe.Ripe.prototype.update = async function(state, options = {}, children = null
         await this.trigger("post_update", {
             id: id,
             state: state,
+            options: options,
             result: result,
             canceled: canceled
         });
@@ -1046,6 +1203,7 @@ ripe.Ripe.prototype.update = async function(state, options = {}, children = null
 
     try {
         this.updatePromise = _update();
+        if (options.noAwaitLayout) return true;
         const result = await this.updatePromise;
         return result;
     } finally {
@@ -1309,6 +1467,8 @@ ripe.Ripe.prototype._getState = function(safe = true) {
     return safe
         ? JSON.parse(JSON.stringify(this._getState(false)))
         : {
+              brand: this.brand,
+              model: this.model,
               parts: this.parts,
               initials: this.initials,
               engraving: this.engraving,

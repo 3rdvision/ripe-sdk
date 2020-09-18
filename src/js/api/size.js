@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -22,7 +22,7 @@ if (
 ripe.Ripe.prototype.getSizes = function(options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes";
+    const url = `${this.url}sizes`;
     options = Object.assign(options, {
         url: url,
         method: "GET"
@@ -34,7 +34,7 @@ ripe.Ripe.prototype.getSizes = function(options, callback) {
 ripe.Ripe.prototype.getSizesP = function(options) {
     return new Promise((resolve, reject) => {
         this.getSizes(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -54,7 +54,7 @@ ripe.Ripe.prototype.getSizesP = function(options) {
 ripe.Ripe.prototype.sizeToNative = function(scale, value, gender, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes/size_to_native";
+    const url = `${this.url}sizes/size_to_native`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -71,7 +71,7 @@ ripe.Ripe.prototype.sizeToNative = function(scale, value, gender, options, callb
 ripe.Ripe.prototype.sizeToNativeP = function(scale, value, gender, options) {
     return new Promise((resolve, reject) => {
         this.sizeToNative(scale, value, gender, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -99,7 +99,7 @@ ripe.Ripe.prototype.sizeToNativeB = function(scales, values, genders, options, c
         valuesP.push(values[index]);
         gendersP.push(genders[index]);
     }
-    const url = this.url + "sizes/size_to_native_b";
+    const url = `${this.url}sizes/size_to_native_b`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -116,7 +116,7 @@ ripe.Ripe.prototype.sizeToNativeB = function(scales, values, genders, options, c
 ripe.Ripe.prototype.sizeToNativeBP = function(scales, values, genders, options) {
     return new Promise((resolve, reject) => {
         this.sizeToNativeB(scales, values, genders, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -135,7 +135,7 @@ ripe.Ripe.prototype.sizeToNativeBP = function(scales, values, genders, options) 
 ripe.Ripe.prototype.nativeToSize = function(scale, value, gender, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes/native_to_size";
+    const url = `${this.url}sizes/native_to_size`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -152,7 +152,7 @@ ripe.Ripe.prototype.nativeToSize = function(scale, value, gender, options, callb
 ripe.Ripe.prototype.nativeToSizeP = function(scale, value, gender, options) {
     return new Promise((resolve, reject) => {
         this.nativeToSize(scale, value, gender, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -179,7 +179,7 @@ ripe.Ripe.prototype.nativeToSizeB = function(scales, values, genders, options, c
         valuesP.push(values[index]);
         gendersP.push(genders[index]);
     }
-    const url = this.url + "sizes/native_to_size_b";
+    const url = `${this.url}sizes/native_to_size_b`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -196,7 +196,7 @@ ripe.Ripe.prototype.nativeToSizeB = function(scales, values, genders, options, c
 ripe.Ripe.prototype.nativeToSizeBP = function(scales, values, genders, options) {
     return new Promise((resolve, reject) => {
         this.nativeToSizeB(scales, values, genders, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -215,7 +215,7 @@ ripe.Ripe.prototype.nativeToSizeBP = function(scales, values, genders, options) 
 ripe.Ripe.prototype.sizeToLocale = function(scale, value, gender, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes/size_to_locale";
+    const url = `${this.url}sizes/size_to_locale`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -232,7 +232,7 @@ ripe.Ripe.prototype.sizeToLocale = function(scale, value, gender, options, callb
 ripe.Ripe.prototype.sizeToLocaleP = function(scale, value, gender, options) {
     return new Promise((resolve, reject) => {
         this.sizeToLocale(scale, value, gender, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -254,7 +254,7 @@ ripe.Ripe.prototype.sizeToLocaleB = function(scales, values, genders, options, c
     genders = typeof genders === "string" ? [genders] : genders;
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes/size_to_locale_b";
+    const url = `${this.url}sizes/size_to_locale_b`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -271,7 +271,7 @@ ripe.Ripe.prototype.sizeToLocaleB = function(scales, values, genders, options, c
 ripe.Ripe.prototype.sizeToLocaleBP = function(scales, values, genders, options) {
     return new Promise((resolve, reject) => {
         this.sizeToLocaleB(scales, values, genders, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -290,7 +290,7 @@ ripe.Ripe.prototype.sizeToLocaleBP = function(scales, values, genders, options) 
 ripe.Ripe.prototype.nativeToLocale = function(scale, value, gender, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes/native_to_locale";
+    const url = `${this.url}sizes/native_to_locale`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -307,7 +307,7 @@ ripe.Ripe.prototype.nativeToLocale = function(scale, value, gender, options, cal
 ripe.Ripe.prototype.nativeToLocaleP = function(scale, value, gender, options) {
     return new Promise((resolve, reject) => {
         this.nativeToLocale(scale, value, gender, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -329,7 +329,7 @@ ripe.Ripe.prototype.nativeToLocaleB = function(scales, values, genders, options,
     genders = typeof genders === "string" ? [genders] : genders;
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "sizes/native_to_locale_b";
+    const url = `${this.url}sizes/native_to_locale_b`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -346,7 +346,7 @@ ripe.Ripe.prototype.nativeToLocaleB = function(scales, values, genders, options,
 ripe.Ripe.prototype.nativeToLocaleBP = function(scales, values, genders, options) {
     return new Promise((resolve, reject) => {
         this.nativeToLocaleB(scales, values, genders, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };

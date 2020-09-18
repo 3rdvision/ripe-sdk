@@ -1,4 +1,4 @@
-# [![RIPE SDK](res/logo.png)](http://www.platforme.com)
+<h1><a href="https://tech.platforme.com"><img src="res/logo.svg" alt="RIPE SDK" height="60" style="height: 60px;"></a></h1>
 
 The public SDK for [RIPE Core](https://github.com/ripe-tech/ripe-core) written in vanilla ECMAScript v6.
 
@@ -327,6 +327,10 @@ Mobile:
 * ≥ Android  4.4
 * ≥ iOS's WebKit 9
 
+## Documentation
+
+For API reference documentation follow [ripe-sdk-docs.platforme.com](https://ripe-sdk-docs.platforme.com).
+
 ## License
 
 RIPE SDK is currently licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/).
@@ -337,7 +341,3 @@ RIPE SDK is currently licensed under the [Apache License, Version 2.0](http://ww
 [![Build Status GitHub](https://github.com/ripe-tech/ripe-sdk/workflows/Main%20Workflow/badge.svg)](https://github.com/ripe-tech/ripe-sdk/actions)
 [![npm Status](https://img.shields.io/npm/v/ripe-sdk.svg)](https://www.npmjs.com/package/ripe-sdk)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/)
-
-## Documentation
-
-For API reference documentation follow [ripe-sdk-docs.platforme.com](https://ripe-sdk-docs.platforme.com).

@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -30,7 +30,7 @@ if (
 ripe.Ripe.prototype.getOrders = function(options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "orders";
+    const url = `${this.url}orders`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -57,7 +57,7 @@ ripe.Ripe.prototype.getOrders = function(options, callback) {
 ripe.Ripe.prototype.getOrdersP = function(options) {
     return new Promise((resolve, reject) => {
         this.getOrders(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -73,7 +73,7 @@ ripe.Ripe.prototype.getOrdersP = function(options) {
 ripe.Ripe.prototype.getOrder = function(number, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "orders/" + String(number);
+    const url = `${this.url}orders/${number}`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -88,12 +88,48 @@ ripe.Ripe.prototype.getOrder = function(number, options, callback) {
  *
  * @param {Number} number The number of the order to find by.
  * @param {Object} options An object of options to configure the request.
- * @returns {Promise} The orders result list.
+ * @returns {Promise} The order requested by number.
  */
 ripe.Ripe.prototype.getOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.getOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
+        });
+    });
+};
+
+/**
+ * Deletes an order by number.
+ *
+ * @param {Number} number The number of the order to delete.
+ * @param {Object} options An object of options to configure the request.
+ * @param {Function} callback Function with the result of the request.
+ * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
+ */
+ripe.Ripe.prototype.deleteOrder = function(number, options, callback) {
+    callback = typeof options === "function" ? options : callback;
+    options = typeof options === "function" || options === undefined ? {} : options;
+    const url = `${this.url}orders/${number}`;
+    options = Object.assign(options, {
+        url: url,
+        method: "DELETE",
+        auth: true
+    });
+    options = this._build(options);
+    return this._cacheURL(options.url, options, callback);
+};
+
+/**
+ * Deletes an order by number.
+ *
+ * @param {Number} number The number of the order to delete.
+ * @param {Object} options An object of options to configure the request.
+ * @returns {Promise} The result of the order deletion.
+ */
+ripe.Ripe.prototype.deleteOrderP = function(number, options) {
+    return new Promise((resolve, reject) => {
+        this.deleteOrder(number, options, (result, isValid, request) => {
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -104,7 +140,7 @@ ripe.Ripe.prototype.getOrderP = function(number, options) {
 ripe.Ripe.prototype.searchOrders = function(filterString, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "orders/search";
+    const url = `${this.url}orders/search`;
     const params = {};
     if (filterString !== undefined && filterString !== null) {
         params.filter_string = filterString;
@@ -125,7 +161,7 @@ ripe.Ripe.prototype.searchOrders = function(filterString, options, callback) {
 ripe.Ripe.prototype.searchOrdersP = function(filterString, options) {
     return new Promise((resolve, reject) => {
         this.searchOrders(filterString, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -145,7 +181,7 @@ ripe.Ripe.prototype.createOrder = function(number, options, callback) {
 ripe.Ripe.prototype.createOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.createOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -165,7 +201,7 @@ ripe.Ripe.prototype.produceOrder = function(number, options, callback) {
 ripe.Ripe.prototype.produceOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.produceOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -185,7 +221,7 @@ ripe.Ripe.prototype.readyOrder = function(number, options, callback) {
 ripe.Ripe.prototype.readyOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.readyOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -205,7 +241,7 @@ ripe.Ripe.prototype.sendOrder = function(number, trackingNumber, trackingUrl, op
 ripe.Ripe.prototype.sendOrderP = function(number, trackingNumber, trackingUrl, options) {
     return new Promise((resolve, reject) => {
         this.sendOrder(number, trackingNumber, trackingUrl, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -225,7 +261,7 @@ ripe.Ripe.prototype.receiveOrder = function(number, options, callback) {
 ripe.Ripe.prototype.receiveOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.receiveOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -245,7 +281,7 @@ ripe.Ripe.prototype.returnOrder = function(number, options, callback) {
 ripe.Ripe.prototype.returnOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.returnOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -265,7 +301,7 @@ ripe.Ripe.prototype.cancelOrder = function(number, options, callback) {
 ripe.Ripe.prototype.cancelOrderP = function(number, options) {
     return new Promise((resolve, reject) => {
         this.cancelOrder(number, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -326,7 +362,7 @@ ripe.Ripe.prototype.importOrder = function(ffOrderId, options, callback) {
 ripe.Ripe.prototype.importOrderP = function(ffOrderId, options, callback) {
     return new Promise((resolve, reject) => {
         this.importOrder(ffOrderId, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -381,7 +417,7 @@ ripe.Ripe.prototype.precustomizationOrder = function(ffId, options, callback) {
 ripe.Ripe.prototype.precustomizationOrderP = function(ffId, options, callback) {
     return new Promise((resolve, reject) => {
         this.precustomizationOrder(ffId, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -392,7 +428,7 @@ ripe.Ripe.prototype.precustomizationOrderP = function(ffId, options, callback) {
 ripe.Ripe.prototype.setOrderStatus = function(number, status, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "orders/" + String(number) + "/" + status;
+    const url = `${this.url}orders/${number}/${status}`;
     options = Object.assign(options, {
         url: url,
         auth: true,
@@ -403,11 +439,111 @@ ripe.Ripe.prototype.setOrderStatus = function(number, status, options, callback)
 };
 
 /**
+ * Gets the order subscription status for the session user.
+ *
+ * @param {Number} number The number of the order to get the subscription status.
+ * @returns {XMLHttpRequest} The order subscription status.
+ */
+ripe.Ripe.prototype.getOrderSubscription = function(number, options, callback) {
+    callback = typeof options === "function" ? options : callback;
+    options = typeof options === "function" || options === undefined ? {} : options;
+    const url = `${this.url}orders/${number}/subscription`;
+    options = Object.assign(options, {
+        url: url,
+        auth: true,
+        cached: false,
+        method: "GET"
+    });
+    options = this._build(options);
+    return this._cacheURL(options.url, options, callback);
+};
+
+/**
+ * Gets the order subscription status for the session user.
+ *
+ * @param {Number} number The number of the order to get the subscription status.
+ * @returns {Promise} The order subscription status.
+ */
+ripe.Ripe.prototype.getOrderSubscriptionP = function(number, options) {
+    return new Promise((resolve, reject) => {
+        this.getOrderSubscription(number, options, (result, isValid, request) => {
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
+        });
+    });
+};
+
+/**
+ * Adds to the email of the user in session to subscriber list of an order.
+ *
+ * @param {Number} number The number of the order to subscribe.
+ * @returns {XMLHttpRequest} The order subscription status.
+ */
+ripe.Ripe.prototype.subscribeOrder = function(number, options, callback) {
+    callback = typeof options === "function" ? options : callback;
+    options = typeof options === "function" || options === undefined ? {} : options;
+    const url = `${this.url}orders/${number}/subscription`;
+    options = Object.assign(options, {
+        url: url,
+        auth: true,
+        method: "PUT"
+    });
+    options = this._build(options);
+    return this._cacheURL(options.url, options, callback);
+};
+
+/**
+ * Adds to the email of the user in session to subscriber list of an order.
+ *
+ * @param {Number} number The number of the order to subscribe.
+ * @returns {Promise} The order subscription status.
+ */
+ripe.Ripe.prototype.subscribeOrderP = function(number, options) {
+    return new Promise((resolve, reject) => {
+        this.subscribeOrder(number, options, (result, isValid, request) => {
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
+        });
+    });
+};
+
+/**
+ * Removes email of the user in session from the subscriber list of an order.
+ *
+ * @param {Number} number The number of the order to unsubscribe.
+ * @returns {XMLHttpRequest} The order subscription status.
+ */
+ripe.Ripe.prototype.unsubscribeOrder = function(number, options, callback) {
+    callback = typeof options === "function" ? options : callback;
+    options = typeof options === "function" || options === undefined ? {} : options;
+    const url = `${this.url}orders/${number}/subscription`;
+    options = Object.assign(options, {
+        url: url,
+        auth: true,
+        method: "DELETE"
+    });
+    options = this._build(options);
+    return this._cacheURL(options.url, options, callback);
+};
+
+/**
+ * Removes email of the user in session from the subscriber list of an order.
+ *
+ * @param {Number} number The number of the order to unsubscribe.
+ * @returns {Promise} The order subscription status.
+ */
+ripe.Ripe.prototype.unsubscribeOrderP = function(number, options) {
+    return new Promise((resolve, reject) => {
+        this.unsubscribeOrder(number, options, (result, isValid, request) => {
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
+        });
+    });
+};
+
+/**
  * @ignore
  */
 ripe.Ripe.prototype._getOrderReportURL = function(number, key, options) {
     options = options === undefined ? {} : options;
-    const url = this.url + "orders/" + String(number) + "/report";
+    const url = `${this.url}orders/${number}/report`;
     options = Object.assign(options, {
         url: url,
         params: { key: key }
@@ -420,7 +556,7 @@ ripe.Ripe.prototype._getOrderReportURL = function(number, key, options) {
  */
 ripe.Ripe.prototype._getOrderReportPDFURL = function(number, key, options) {
     options = options === undefined ? {} : options;
-    const url = this.url + "orders/" + String(number) + "/report.pdf";
+    const url = `${this.url}orders/${number}/report.pdf`;
     options = Object.assign(options, {
         url: url,
         params: { key: key }
@@ -433,7 +569,7 @@ ripe.Ripe.prototype._getOrderReportPDFURL = function(number, key, options) {
  */
 ripe.Ripe.prototype._getOrderReportPNGURL = function(number, key, options) {
     options = options === undefined ? {} : options;
-    const url = this.url + "orders/" + String(number) + "/report.png";
+    const url = `${this.url}orders/${number}/report.png`;
     options = Object.assign(options, {
         url: url,
         params: { key: key }
@@ -468,7 +604,7 @@ ripe.Ripe.prototype._importOrder = function(ffOrderId, options = {}) {
     const country = options.country === undefined ? null : options.country;
     const meta = options.meta === undefined ? null : options.meta;
 
-    const url = this.url + "orders/import";
+    const url = `${this.url}orders/import`;
     const contents = {
         brand: brand,
         model: model,
@@ -525,7 +661,7 @@ ripe.Ripe.prototype._precustomizationOrder = function(ffId, options = {}) {
             : options.product_id || options.productId;
     const meta = options.meta === undefined ? null : options.meta;
 
-    const url = this.url + "orders/pre_customization";
+    const url = `${this.url}orders/pre_customization`;
     const contents = {
         brand: brand,
         model: model,

@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");
@@ -40,7 +40,7 @@ ripe.RipeAPI = function(options = {}) {
 ripe.Ripe.prototype.ping = function(options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "ping";
+    const url = `${this.url}ping`;
     options = Object.assign(options, {
         url: url,
         method: "GET"
@@ -52,7 +52,7 @@ ripe.Ripe.prototype.ping = function(options, callback) {
 ripe.Ripe.prototype.pingP = function(options) {
     return new Promise((resolve, reject) => {
         this.ping(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -70,7 +70,7 @@ ripe.Ripe.prototype.pingP = function(options) {
 ripe.Ripe.prototype.geoResolve = function(address, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "geo_resolve";
+    const url = `${this.url}geo_resolve`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -85,7 +85,7 @@ ripe.Ripe.prototype.geoResolve = function(address, options, callback) {
 ripe.Ripe.prototype.geoResolveP = function(address, options) {
     return new Promise((resolve, reject) => {
         this.geoResolve(address, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -103,7 +103,7 @@ ripe.Ripe.prototype.geoResolveP = function(address, options) {
 ripe.Ripe.prototype.signin = function(username, password, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "signin";
+    const url = `${this.url}signin`;
     options = Object.assign(options, {
         url: url,
         method: "POST",
@@ -119,7 +119,7 @@ ripe.Ripe.prototype.signin = function(username, password, options, callback) {
 ripe.Ripe.prototype.signinP = function(username, password, options) {
     return new Promise((resolve, reject) => {
         this.signin(username, password, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -139,7 +139,7 @@ ripe.Ripe.prototype.signinP = function(username, password, options) {
 ripe.Ripe.prototype.signinAdmin = function(username, password, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "signin_admin";
+    const url = `${this.url}signin_admin`;
     options = Object.assign(options, {
         url: url,
         method: "POST",
@@ -155,7 +155,7 @@ ripe.Ripe.prototype.signinAdmin = function(username, password, options, callback
 ripe.Ripe.prototype.signinAdminP = function(username, password, options) {
     return new Promise((resolve, reject) => {
         this.signinAdmin(username, password, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -172,7 +172,7 @@ ripe.Ripe.prototype.signinAdminP = function(username, password, options) {
 ripe.Ripe.prototype.signinPid = function(token, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "signin_pid";
+    const url = `${this.url}signin_pid`;
     options = Object.assign(options, {
         url: url,
         method: "POST",
@@ -187,7 +187,7 @@ ripe.Ripe.prototype.signinPid = function(token, options, callback) {
 ripe.Ripe.prototype.signinPidP = function(token, options) {
     return new Promise((resolve, reject) => {
         this.signinAdmin(token, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -212,7 +212,7 @@ ripe.Ripe.prototype.getPrice = function(options, callback) {
 ripe.Ripe.prototype.getPriceP = function(options) {
     return new Promise((resolve, reject) => {
         this.getPrice(options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -243,9 +243,20 @@ ripe.Ripe.prototype._cacheURL = function(url, options, callback) {
     cached = typeof cached === "undefined" ? true : cached;
     cached = cached && !options.force && ["GET"].indexOf(options.method || "GET") !== -1;
 
+    // determines if the cache entry should be invalidated before
+    // making the request, it should only be invalidate in case the
+    // the current request is being done with the cached flag
+    let invalidate = options.invalidate;
+    invalidate = typeof invalidate === "undefined" ? false : invalidate;
+    invalidate = cached && invalidate;
+
     // initializes the cache object in the current instance
     // in case it does not exists already
     this._cache = this._cache === undefined ? {} : this._cache;
+
+    // in case the invalidate flag is set then the cache for the
+    // current key should be removed (invalidated)
+    if (invalidate) delete this._cache[fullKey];
 
     // in case there's already a valid value in cache,
     // retrieves it and calls the callback with the value
@@ -320,8 +331,13 @@ ripe.Ripe.prototype._requestURLFetch = function(url, options, callback) {
         .then(async response => {
             let result = null;
             const isValid = validCodes.includes(response.status);
+            const contentType = response.headers.get("content-type").toLowerCase();
             try {
-                result = await response.json();
+                if (contentType.startsWith("application/json")) {
+                    result = await response.json();
+                } else {
+                    result = await response.blob();
+                }
             } catch (error) {
                 response.error = response.error || error;
                 callback.call(context, result, isValid, response);
@@ -571,7 +587,7 @@ ripe.Ripe.prototype._getPriceOptions = function(options = {}) {
         params.initials = initials;
     }
 
-    const url = this.url + "config/price";
+    const url = `${this.url}config/price`;
 
     options = Object.assign(options, {
         url: url,
@@ -632,7 +648,7 @@ ripe.Ripe.prototype._getImageOptions = function(options = {}) {
         params.initials = initials;
     }
 
-    const url = this.url + "compose";
+    const url = `${this.url}compose`;
 
     options = Object.assign(options, {
         url: url,
@@ -665,7 +681,7 @@ ripe.Ripe.prototype._getMaskOptions = function(options = {}) {
         params.part = options.part;
     }
 
-    const url = this.url + "mask";
+    const url = `${this.url}mask`;
 
     options = Object.assign(options, {
         url: url,
@@ -686,6 +702,7 @@ ripe.Ripe.prototype._getSwatchOptions = function(options = {}) {
 
     const brand = options.brand === undefined ? this.brand : options.brand;
     const model = options.model === undefined ? this.model : options.model;
+    const version = options.version === undefined ? this.version : options.version;
     const params = options.params || {};
 
     options.params = params;
@@ -696,6 +713,10 @@ ripe.Ripe.prototype._getSwatchOptions = function(options = {}) {
 
     if (model !== undefined && model !== null) {
         params.model = model;
+    }
+
+    if (version !== undefined && version !== null) {
+        params.version = version;
     }
 
     if (options.material !== undefined && options.material !== null) {
@@ -710,7 +731,7 @@ ripe.Ripe.prototype._getSwatchOptions = function(options = {}) {
         params.format = options.format;
     }
 
-    const url = this.url + "swatch";
+    const url = `${this.url}swatch`;
 
     options = Object.assign(options, {
         url: url,
@@ -766,18 +787,25 @@ ripe.Ripe.prototype._build = function(options) {
     const url = options.url || "";
     const method = options.method || "GET";
     const params = options.params || {};
+    const headers = options.headers || {};
     const auth = options.auth || false;
     if (auth && this.sid !== undefined && this.sid !== null) {
         params.sid = this.sid;
     }
     if (auth && this.key !== undefined && this.key !== null) {
-        const headers = params.headers || {};
         headers["X-Secret-Key"] = this.key;
-        params.headers = headers;
+    }
+    if (
+        auth &&
+        (this.sid === undefined || this.sid === null) &&
+        (this.key === undefined || this.key === null)
+    ) {
+        throw new Error("Authorization requested but none is available");
     }
     options.url = url;
     options.method = method;
-    options.params = params;
+    options.params = Object.assign({}, this.params, params);
+    options.headers = Object.assign({}, this.headers, headers);
     options.auth = auth;
     return options;
 };
@@ -967,7 +995,12 @@ ripe.Ripe.prototype._partsMToQuery = function(partsM, sort = true) {
     if (sort) names.sort();
     for (const name of names) {
         const part = partsM[name];
-        const triplet = `${name}:${part.material}:${part.color}`;
+        const [nameE, initialsE, engravingE] = [
+            ripe.escape(name, ":"),
+            ripe.escape(part.material, ":"),
+            ripe.escape(part.color, ":")
+        ];
+        const triplet = `${nameE}:${initialsE}:${engravingE}`;
         queryL.push(`p=${triplet}`);
     }
     return queryL.join("&");
@@ -979,7 +1012,7 @@ ripe.Ripe.prototype._parseExtraS = function(extraS) {
         const [name, initials, engraving] = ripe.splitUnescape(extraI, ":", 2);
         extra[name] = {
             initials: initials,
-            engraving: engraving
+            engraving: engraving || null
         };
     }
     return extra;
@@ -992,7 +1025,12 @@ ripe.Ripe.prototype._generateExtraS = function(extra, sort = true) {
     for (const name of names) {
         const values = extra[name];
         const [initials, engraving] = [values.initials, values.engraving];
-        const extraI = `${name}:${initials}:${engraving}`;
+        const [nameE, initialsE, engravingE] = [
+            ripe.escape(name, ":"),
+            ripe.escape(initials, ":"),
+            ripe.escape(engraving || "", ":")
+        ];
+        const extraI = `${nameE}:${initialsE}:${engravingE}`;
         extraS.push(extraI);
     }
     return extraS;

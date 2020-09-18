@@ -5,7 +5,31 @@ const ripe = require("../../../src/js");
 describe("BrandAPI", function() {
     this.timeout(config.TEST_TIMEOUT);
 
-    describe("#_getCombinationsOptions", function() {
+    describe("#runLogicP()", function() {
+        it("should execute a simple logic", async () => {
+            let result = null;
+
+            const remote = ripe.RipeAPI();
+
+            result = await remote.runLogicP({
+                brand: "dummy",
+                model: "cube",
+                method: "minimum_initials"
+            });
+
+            assert.strictEqual(await result.text(), "1");
+
+            result = await remote.runLogicP({
+                brand: "dummy",
+                model: "cube",
+                method: "maximum_initials"
+            });
+
+            assert.strictEqual(await result.text(), "4");
+        });
+    });
+
+    describe("#_getCombinationsOptions()", function() {
         it("should include use_name as 0 by default", async () => {
             let result = null;
 

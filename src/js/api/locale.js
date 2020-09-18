@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -27,7 +27,7 @@ ripe.Ripe.prototype.locale = function(value, locale, options, callback) {
 ripe.Ripe.prototype.localeP = function(value, locale, options) {
     return new Promise((resolve, reject) => {
         this.locale(value, locale, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -45,7 +45,7 @@ ripe.Ripe.prototype.localeMultiple = function(values, locale, options, callback)
     values = typeof values === "string" ? [values] : values;
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "locale";
+    const url = `${this.url}locale`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -61,7 +61,7 @@ ripe.Ripe.prototype.localeMultiple = function(values, locale, options, callback)
 ripe.Ripe.prototype.localeMultipleP = function(values, locale, options) {
     return new Promise((resolve, reject) => {
         this.localeMultiple(values, locale, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };
@@ -78,7 +78,7 @@ ripe.Ripe.prototype.localeMultipleP = function(values, locale, options) {
 ripe.Ripe.prototype.localeBundle = function(locale, context, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "locale/bundle";
+    const url = `${this.url}locale/bundle`;
     options = Object.assign(options, {
         url: url,
         method: "GET",
@@ -94,7 +94,7 @@ ripe.Ripe.prototype.localeBundle = function(locale, context, options, callback) 
 ripe.Ripe.prototype.localeBundleP = function(locale, context, options) {
     return new Promise((resolve, reject) => {
         this.localeBundle(locale, context, options, (result, isValid, request) => {
-            isValid ? resolve(result) : reject(new ripe.RemoteError(request));
+            isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
         });
     });
 };

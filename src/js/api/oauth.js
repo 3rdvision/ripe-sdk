@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -26,7 +26,7 @@ if (
 ripe.Ripe.prototype.oauthAccessToken = function(code, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "admin/oauth/access_token";
+    const url = `${this.url}admin/oauth/access_token`;
     options = Object.assign(options, {
         url: url,
         method: "POST",
@@ -55,7 +55,7 @@ ripe.Ripe.prototype.oauthAccessToken = function(code, options, callback) {
 ripe.Ripe.prototype.oauthLogin = function(accessToken, options, callback) {
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
-    const url = this.url + "admin/oauth/login";
+    const url = `${this.url}admin/oauth/login`;
     options = Object.assign(options, {
         url: url,
         method: "POST",

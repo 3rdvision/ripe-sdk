@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("./base");
@@ -154,9 +154,7 @@ ripe.parseFrameKey = function(frame, token) {
  * @ignore
  */
 ripe.frameNameHack = function(frame) {
-    if (!frame) {
-        return "";
-    }
+    if (!frame) return "";
     const _frame = ripe.parseFrameKey(frame);
     const view = _frame[0];
     let position = _frame[1];

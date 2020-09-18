@@ -3,7 +3,7 @@ if (
     (typeof window === "undefined" ||
         // eslint-disable-next-line camelcase
         typeof __webpack_require__ !== "undefined" ||
-        (navigator !== undefined && navigator.product === "ReactNative"))
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
@@ -38,7 +38,7 @@ ripe.Visual = function(owner, element, options) {
 };
 
 ripe.Visual.prototype = ripe.build(ripe.Interactable.prototype);
-ripe.Visual.constructor = ripe.Visual;
+ripe.Visual.prototype.constructor = ripe.Visual;
 
 /**
  * The initializer which is called (by the owner)
@@ -56,7 +56,7 @@ ripe.Visual.prototype.init = function() {
  * it should stop responding to updates so that any necessary
  * cleanup operations can be executed.
  */
-ripe.Visual.prototype.deinit = function() {
+ripe.Visual.prototype.deinit = async function() {
     this._removeElementHandlers();
     this.element = null;
     this.elementEvents = null;
