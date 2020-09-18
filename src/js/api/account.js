@@ -7,7 +7,7 @@ if (
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
-    console.log("hello from deno");
+    console.log("hello from deno", Deno);
     // eslint-disable-next-line no-redeclare
     var ripe = base.ripe;
 }
