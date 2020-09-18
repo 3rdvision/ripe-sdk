@@ -76,7 +76,9 @@ if (
 ) {
     var fetch = null;
     if (
-        true
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ === "undefined" &&
+        (typeof navigator === "undefined" || navigator.product !== "ReactNative")
     ) {
         fetch = require("node-fetch");
     } else {
