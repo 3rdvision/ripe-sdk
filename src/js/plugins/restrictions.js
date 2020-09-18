@@ -1,7 +1,15 @@
-// eslint-disable-next-line no-redeclare
-var base = require("./base");
-// eslint-disable-next-line no-redeclare
-var ripe = base.ripe;
+if (
+    typeof require !== "undefined" &&
+    (typeof window === "undefined" ||
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ !== "undefined" ||
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative"))
+) {
+    // eslint-disable-next-line no-redeclare
+    var base = require("./base");
+    // eslint-disable-next-line no-redeclare
+    var ripe = base.ripe;
+}
 
 /**
  * @class
@@ -12,7 +20,7 @@ var ripe = base.ripe;
  * If defined, overrides the rules defined on the model's config.
  * @param {Object} options An object with options to configure the plugin.
  */
-ripe.Ripe.plugins.RestrictionsPlugin = function (restrictions, options = {}) {
+ripe.Ripe.plugins.RestrictionsPlugin = function(restrictions, options = {}) {
     ripe.Ripe.plugins.Plugin.call(this);
     this.token = options.token || ":";
     this.restrictions = restrictions;
@@ -33,7 +41,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype.constructor = ripe.Ripe.plugins.R
  *
  * @param {Ripe} The Ripe instance in use.
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype.register = function (owner) {
+ripe.Ripe.plugins.RestrictionsPlugin.prototype.register = function(owner) {
     ripe.Ripe.plugins.Plugin.prototype.register.call(this, owner);
 
     // runs the initial configuration, should take into account if
@@ -58,7 +66,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype.register = function (owner) {
  *
  * @param {Ripe} The Ripe instance in use.
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype.unregister = function (owner) {
+ripe.Ripe.plugins.RestrictionsPlugin.prototype.unregister = function(owner) {
     this.partsOptions = null;
     this.options = null;
     this.owner && this.owner.unbind("part", this._partBind);
@@ -70,7 +78,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype.unregister = function (owner) {
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._config = function () {
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._config = function() {
     this.restrictions =
         this.auto && this.owner.loadedConfig
             ? this.owner.loadedConfig.restrictions
@@ -90,7 +98,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._config = function () {
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyRestrictions = function (name, value) {
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyRestrictions = function(name, value) {
     // creates an array with the customization, by copying the
     // current parts environment into a separate array
     const customization = [];
@@ -112,10 +120,10 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyRestrictions = function (na
     const partSet =
         name !== undefined
             ? {
-                name: name,
-                material: value.material,
-                color: value.color
-            }
+                  name: name,
+                  material: value.material,
+                  color: value.color
+              }
             : null;
     name !== undefined && customization.push(partSet);
 
@@ -132,7 +140,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyRestrictions = function (na
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._solveRestrictions = function (
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._solveRestrictions = function(
     availableParts,
     restrictions,
     customization,
@@ -171,7 +179,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._solveRestrictions = function (
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyChanges = function (
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyChanges = function(
     newParts,
     oldParts = null
 ) {
@@ -227,7 +235,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._applyChanges = function (
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._getRestrictionKey = function (
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._getRestrictionKey = function(
     part,
     material,
     color,
@@ -253,7 +261,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._getRestrictionKey = function (
  *
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._buildRestrictionsMap = function (restrictions) {
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._buildRestrictionsMap = function(restrictions) {
     const restrictionsMap = {};
 
     // in case the restrictions value to be applied is not valid returns
@@ -311,7 +319,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._buildRestrictionsMap = function 
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._isRestricted = function (
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._isRestricted = function(
     newPart,
     restrictions,
     parts
@@ -368,7 +376,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._isRestricted = function (
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._isComplete = function (parts) {
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._isComplete = function(parts) {
     // iterates through the parts array and creates
     // an array with the names of the parts for
     // easier searching
@@ -397,7 +405,7 @@ ripe.Ripe.plugins.RestrictionsPlugin.prototype._isComplete = function (parts) {
 /**
  * @ignore
  */
-ripe.Ripe.plugins.RestrictionsPlugin.prototype._alternativeFor = function (
+ripe.Ripe.plugins.RestrictionsPlugin.prototype._alternativeFor = function(
     newPart,
     availableParts,
     pop
