@@ -1,6 +1,6 @@
 {
     "name": "@3rdvision/ripe-sdk",
-    "version": "1.12.24",
+    "version": "1.12.26",
     "description": "The public SDK for RIPE Core",
     "keywords": [
         "js",

@@ -1,8 +1,13 @@
 if (
-    true 
+    typeof Deno !== "undefined" || (typeof require !== "undefined" &&
+    (typeof window === "undefined" ||
+        // eslint-disable-next-line camelcase
+        typeof __webpack_require__ !== "undefined" ||
+        (typeof navigator !== "undefined" && navigator.product === "ReactNative")))
 ) {
     // eslint-disable-next-line no-redeclare
     var base = require("../base");
+    console.log("hello from deno");
     // eslint-disable-next-line no-redeclare
     var ripe = base.ripe;
 }
