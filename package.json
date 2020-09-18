@@ -1,5 +1,5 @@
 {
-    "name": "ripe-sdk",
+    "name": "@3rdvision/ripe-sdk",
     "version": "1.12.0",
     "description": "The public SDK for RIPE Core",
     "keywords": [
@@ -16,10 +16,7 @@
         "url": "git+https://github.com/ripe-tech/ripe-sdk.git"
     },
     "license": "Apache-2.0",
-    "author": {
-        "name": "Platforme",
-        "url": "https://www.platforme.com"
-    },
+    "author": "Platforme (https://www.platforme.com)",
     "main": "src/js/index.js",
     "unpkg": "dist/ripe.js",
     "files": [
@@ -83,5 +80,11 @@
         "prettier-config-hive": "^0.1.7",
         "sort-package-json": "^1.44.0",
         "uuid": "^8.2.0"
+    },
+    "directories": {
+        "test": "test"
+    },
+    "exports": {
+        "./": "./src/js/index.js"
     }
 }
