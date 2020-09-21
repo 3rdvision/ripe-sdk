@@ -205,10 +205,13 @@ ripe.Ripe.prototype.authPidP = function(token, options) {
  * @returns {XMLHttpRequest} The XMLHttpRequest instance of the API request.
  */
 ripe.Ripe.prototype.authKey = function(key, options, callback) {
+    console.log("authKey", key);
     callback = typeof options === "function" ? options : callback;
     options = typeof options === "function" || options === undefined ? {} : options;
 
+    console.log("this.key before", key);
     this.key = key;
+    console.log("this.key after", key);
     this.accountMe(options, (result, isValid, request) => {
         if (isValid) this.trigger("auth");
         if (callback) callback(result, isValid, request);
@@ -227,6 +230,7 @@ ripe.Ripe.prototype.authKey = function(key, options, callback) {
  * @returns {Promise} The authenticated account data.
  */
 ripe.Ripe.prototype.authKeyP = function(key, options) {
+    console.log("authKeyP", key);
     return new Promise((resolve, reject) => {
         this.authKey(key, options, (result, isValid, request) => {
             isValid ? resolve(result) : reject(new ripe.RemoteError(request, null, result));
